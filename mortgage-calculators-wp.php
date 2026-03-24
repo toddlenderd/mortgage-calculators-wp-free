@@ -3,7 +3,7 @@
  * Plugin Name:  Mortgage Calculators WP
  * Plugin URI:   https://mortgagecalculatorsplugin.com
  * Description:  A contemporary set of mortgage calculators from Lenderd.com
- * Version:      1.61
+ * Version:      1.62
  * Author:       Lenderd
  * Author URI:   https://lenderd.com
  * License:      GPL2

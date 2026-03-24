@@ -3,8 +3,8 @@ Contributors: (8blocks)
 Donate link: http://wordpress.org
 Tags: mortgage, mortgage calculator, loan calculator, real estate, mortgage calc
 Requires at least: 4.6
-Stable tag: 1.61
-Tested up to: 6.8
+Stable tag: 1.62
+Tested up to: 6.9.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,13 @@ Yes you can. We have provided a color picker that will change the look/feel of y
 First Version! Enjoy!
 
 == Changelog ==
+= 1.62 20260324 =
+
+* Updated conventional email to styled card template
+* Removed unused license stub files
+* Removed Dreamweaver _notes folders
+* Tested up to WordPress 6.9.4
+
 = 1.61 20260324 =
 
 * Fixed FHA/VA tax percent slider variable typo bugs (fhva_ and vva_ prefixes)
