@@ -64,6 +64,15 @@ function mcwp_enqueue() {
 	wp_register_script( 'wpmc_calculator', plugin_dir_url( __FILE__ ) . 'assets/js/wpmc.js', array( 'jquery', 'wpmc_slider' ), MCWP_VERSION, true );
 	wp_register_style( 'wpmc_slider_css', plugin_dir_url( __FILE__ ) . 'assets/bootstrap-slider/bootstrap-slider.css', array(), MCWP_VERSION );
 	wp_register_style( 'wpmc_slider', plugin_dir_url( __FILE__ ) . 'assets/css/wpmc.css', array( 'wpmc_slider_css' ), MCWP_VERSION );
+
+	// Attach inline color style so it outputs whenever wpmc_slider is enqueued by the shortcode.
+	$option_func = ( mcwp_use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
+	$mcwp_color  = $option_func( 'mcwp_color' );
+	if ( ! empty( $mcwp_color ) ) {
+		$css = '.mcalc-color,.mcalc .slider-handle.round,.mcalc .slider.slider-horizontal .slider-selection{background:' . esc_attr( $mcwp_color ) . ' !important;}';
+		wp_add_inline_style( 'wpmc_slider', $css );
+	}
+
 	wp_localize_script(
 		'wpmc_calculator',
 		'mcwp_ajax',
@@ -91,20 +100,6 @@ function mcwp_admin_scripts( $hook_suffix ) {
 	wp_enqueue_script( 'wpmc-script-handle', plugin_dir_url( __FILE__ ) . 'admin/admin.js', array( 'wp-color-picker', 'jquery' ), MCWP_VERSION, true );
 }
 add_action( 'admin_enqueue_scripts', 'mcwp_admin_scripts' );
-
-/**
- * Output inline calculator color styles.
- */
-function mcwp_inline_color_style() {
-	if ( ! wp_style_is( 'wpmc_slider', 'enqueued' ) ) {
-		return;
-	}
-	$option_func = ( mcwp_use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
-	$mcwp_color  = $option_func( 'mcwp_color' );
-	$css         = '.mcalc-color,.mcalc .slider-handle.round,.mcalc .slider.slider-horizontal .slider-selection{background:' . esc_attr( $mcwp_color ) . ' !important;}';
-	wp_add_inline_style( 'wpmc_slider', $css );
-}
-add_action( 'wp_enqueue_scripts', 'mcwp_inline_color_style', 20 );
 
 /**
  * Network admin menu.
