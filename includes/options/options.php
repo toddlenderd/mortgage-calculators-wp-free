@@ -104,27 +104,6 @@ function wpmc_admin_init() {
 			'placeholder'  => __( 'Email address your leads will be sent to...', 'mortgage-calculators-wp' ),
 		),
 		array(
-			'wpmc_one_msg_bdy',
-			'type'         => 'msg_body',
-			'section_name' => 'wpmc-settings-one',
-			'label'        => '
-              ' . __( 'Message Body', 'mortgage-calculators-wp' ) . ' <br /><br />
-              <span style="font-weight: 400">' . __( 'Available Tags', 'mortgage-calculators-wp' ) . ': <br />
-			  [calculation_result]<br />
-              [principal-and-interest]<br />
-              [monthly-taxes]<br />
-              [monthly-insurance]<br />
-              [monthly-hoa]<br />
-              [purchase-price]<br />
-              [mortgage-term]<br />
-              [down-payment]<br />
-              [annual-taxes]<br />
-              [annual-insurance]<br />
-              </span>',
-			'group'        => 'wpmc_one',
-		),
-
-		array(
 			'wpmc_one_disclaimer',
 			'type'         => $textarea,
 			'section_name' => 'wpmc-settings-one',
