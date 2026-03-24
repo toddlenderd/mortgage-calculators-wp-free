@@ -217,3 +217,179 @@ function delete_wpmc_option( $option_name ) {
 		return delete_option( $option_name );
 	}
 }
+
+/**
+ * Get the calculator accent color from settings.
+ *
+ * @return string Sanitized CSS color value.
+ */
+function mcwp_get_color() {
+	$option_func = ( use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
+	$color       = $option_func( 'mcwp_color' );
+
+	if ( empty( $color ) ) {
+		return '#1a56db';
+	}
+
+	if ( strpos( $color, '[' ) !== false ) {
+		$color = do_shortcode( $color );
+	}
+
+	$color = trim( $color );
+
+	if ( preg_match( '/^#[0-9a-fA-F]{3,8}$/', $color ) ) {
+		return $color;
+	}
+	if ( preg_match( '/^[a-zA-Z]+$/', $color ) ) {
+		return $color;
+	}
+	if ( preg_match( '/^(rgba?|hsla?)\(\s*[\d\s,.\/%]+\)$/', $color ) ) {
+		return $color;
+	}
+
+	return '#1a56db';
+}
+
+/**
+ * Build a styled email using the "Clean Card" template.
+ *
+ * @param array $args {
+ *     @type string $calc_type    Display name, e.g. "Conventional Loan".
+ *     @type string $subtitle     Subtitle line, e.g. "30 Year Fixed".
+ *     @type string $total        Formatted total payment, e.g. "$1,687".
+ *     @type string $total_label  Optional label above total. Default "Estimated Monthly Payment".
+ *     @type string $message      Custom message from admin settings.
+ *     @type array  $rows         Array of ['label' => ..., 'value' => ...] for the breakdown table.
+ *     @type string $curr_symbol  Currency symbol.
+ *     @type string $disclaimer   Optional disclaimer text.
+ * }
+ * @return string Full HTML email body.
+ */
+function mcwp_email_template( $args ) {
+	$color = mcwp_get_color();
+
+	$calc_type   = esc_html( $args['calc_type'] );
+	$subtitle    = esc_html( $args['subtitle'] );
+	$total       = esc_html( $args['total'] );
+	$total_label = isset( $args['total_label'] ) ? esc_html( $args['total_label'] ) : __( 'Estimated Monthly Payment', 'mortgage-calculators-wp' );
+	$message     = $args['message'];
+	$rows        = $args['rows'];
+	$disclaimer  = isset( $args['disclaimer'] ) ? $args['disclaimer'] : '';
+
+	$rows_html = '';
+	foreach ( $rows as $row ) {
+		$rows_html .= '
+				<tr>
+				  <td style="padding:12px 0; border-bottom:1px solid #f3f4f6; color:#6b7280;">' . esc_html( $row['label'] ) . '</td>
+				  <td style="padding:12px 0; border-bottom:1px solid #f3f4f6; text-align:right; font-weight:600; color:#111827;">' . esc_html( $row['value'] ) . '</td>
+				</tr>';
+	}
+
+	$rows_html .= '
+				<tr>
+				  <td style="padding:14px 0 0; font-weight:700; color:#111827; font-size:15px;">' . __( 'Total Monthly Payment', 'mortgage-calculators-wp' ) . '</td>
+				  <td class="color" style="padding:14px 0 0; text-align:right; font-weight:700; color:' . esc_attr( $color ) . '; font-size:15px;">' . $total . '</td>
+				</tr>';
+
+	$disclaimer_html = '';
+	if ( ! empty( $disclaimer ) ) {
+		$disclaimer_html = '
+		  <tr>
+			<td style="padding:0 40px 32px;">
+			  <p style="margin:0; font-size:12px; line-height:18px; color:#9ca3af;">' . $disclaimer . '</p>
+			</td>
+		  </tr>';
+	}
+
+	$message_html = '';
+	if ( ! empty( $message ) ) {
+		$message_html = '
+		  <tr>
+			<td style="padding:24px 40px 8px;">
+			  <p style="margin:0; font-size:15px; line-height:24px; color:#4b5563;">' . $message . '</p>
+			</td>
+		  </tr>';
+	}
+
+	$html = '
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="bg" style="background-color:#f4f5f7; padding:40px 20px; font-family:\'Helvetica Neue\', Helvetica, Arial, sans-serif; color:#2d3748;">
+  <tr>
+	<td align="center">
+	  <table role="presentation" width="600" cellpadding="0" cellspacing="0" class="bg" style="background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 4px 6px rgba(0,0,0,0.07);">
+
+		<tr>
+		  <td class="bg color" style="background-color:' . esc_attr( $color ) . '; padding:32px 40px; text-align:center;">
+			<h1 style="margin:0; font-size:24px; font-weight:600; color:#ffffff; letter-spacing:-0.3px;">' . __( 'Your Calculations', 'mortgage-calculators-wp' ) . '</h1>
+			<p style="margin:8px 0 0; font-size:14px; color:rgba(255,255,255,0.75);">' . $calc_type . ' &bull; ' . $subtitle . '</p>
+		  </td>
+		</tr>
+
+		<tr>
+		  <td style="padding:36px 40px 20px; text-align:center; border-bottom:1px solid #e5e7eb;">
+			<p style="margin:0 0 4px; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#6b7280;">' . $total_label . '</p>
+			<p class="color" style="margin:0; font-size:48px; font-weight:700; color:' . esc_attr( $color ) . '; letter-spacing:-1px;">' . $total . '</p>
+		  </td>
+		</tr>
+
+		' . $message_html . '
+
+		<tr>
+		  <td style="padding:16px 40px 32px;">
+			<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">
+			  ' . $rows_html . '
+			</table>
+		  </td>
+		</tr>
+
+		' . $disclaimer_html . '
+
+	  </table>
+	</td>
+  </tr>
+</table>';
+
+	return $html;
+}
+
+/**
+ * Build a styled admin notification (CC) email.
+ *
+ * @param string $to           The lead's email address.
+ * @param string $calc_type    Display name of calculator type.
+ * @param string $body_content The lead's email body content to include as reference.
+ * @return string Full HTML email body for admin.
+ */
+function mcwp_cc_email_template( $to, $calc_type, $body_content ) {
+	$color = mcwp_get_color();
+
+	$html = '
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="bg" style="background-color:#f4f5f7; padding:40px 20px; font-family:\'Helvetica Neue\', Helvetica, Arial, sans-serif; color:#2d3748;">
+  <tr>
+	<td align="center">
+	  <table role="presentation" width="600" cellpadding="0" cellspacing="0" class="bg" style="background-color:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 4px 6px rgba(0,0,0,0.07);">
+
+		<tr>
+		  <td class="bg color" style="background-color:' . esc_attr( $color ) . '; padding:24px 40px; text-align:center;">
+			<h1 style="margin:0; font-size:20px; font-weight:600; color:#ffffff;">' . sprintf( __( 'New %s Lead', 'mortgage-calculators-wp' ), esc_html( $calc_type ) ) . '</h1>
+		  </td>
+		</tr>
+
+		<tr>
+		  <td style="padding:28px 40px;">
+			<p style="margin:0 0 16px; font-size:15px; line-height:24px; color:#4b5563;">
+			  <a href="mailto:' . esc_attr( $to ) . '" class="color" style="color:' . esc_attr( $color ) . '; font-weight:600; text-decoration:none;">' . esc_html( $to ) . '</a>
+			  ' . __( 'requested a calculation. A copy of the email they received is below for reference.', 'mortgage-calculators-wp' ) . '
+			</p>
+			<div class="bg" style="background-color:#f9fafb; border-radius:8px; padding:20px; border:1px solid #e5e7eb;">
+			  ' . $body_content . '
+			</div>
+		  </td>
+		</tr>
+
+	  </table>
+	</td>
+  </tr>
+</table>';
+
+	return $html;
+}

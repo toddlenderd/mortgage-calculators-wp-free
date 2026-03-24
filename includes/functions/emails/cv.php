@@ -21,18 +21,51 @@ $option_func                = ( use_network_settings( 'wpmc_one_use_network_sett
 $wpmc_admin                 = $option_func( 'wpmc_one_email' );
 $site_admin                 = checksettings( 'admin_email' );
 
-// Dynamically Create the Body.
-$msg_body          = $option_func( 'wpmc_one_msg_bdy' );
-$current_post      = map_deep( $_REQUEST, 'wp_kses_post' );
-$body_part_dynamic = body_dynamic( $msg_body, $_REQUEST );
-$subject           = __( 'Your Conventional Mortgage Calculation', 'mortgage-calculators-wp' );
+$subject = __( 'Your Conventional Mortgage Calculation', 'mortgage-calculators-wp' );
 
-$body_part_static = __( 'Based on a purchase price of', 'mortgage-calculators-wp' ) . " <strong>$curr_symbol$price</strong>, " . __( 'and a down payment of', 'mortgage-calculators-wp' ) . " <strong>$curr_symbol$down_payment</strong>, " . __( 'your new', 'mortgage-calculators-wp' ) . " <strong>$_term " . __( 'year', 'mortgage-calculators-wp' ) . '</strong> ' . __( 'loan with an interest rate of', 'mortgage-calculators-wp' ) . " <strong>$interest_rate%</strong> " . __( 'will have a payment of', 'mortgage-calculators-wp' ) . " <strong>$curr_symbol$calculation_result</strong>. " . __( 'This includes monthly taxes of', 'mortgage-calculators-wp' ) . " <strong>$curr_symbol$monthly_taxes</strong>, " . __( 'monthly insurance of', 'mortgage-calculators-wp' ) . " <strong>$curr_symbol$monthly_insurance</strong>, " . __( 'and monthly hoa of', 'mortgage-calculators-wp' ) . " <strong>$curr_symbol$monthly_hoa</strong>.";
+// Build the breakdown rows for the email template.
+$rows = array(
+	array(
+		'label' => __( 'Purchase Price', 'mortgage-calculators-wp' ),
+		'value' => $curr_symbol . $price,
+	),
+	array(
+		'label' => __( 'Down Payment', 'mortgage-calculators-wp' ),
+		'value' => $curr_symbol . $down_payment,
+	),
+	array(
+		'label' => __( 'Interest Rate', 'mortgage-calculators-wp' ),
+		'value' => $interest_rate . '%',
+	),
+	array(
+		'label' => __( 'Principal & Interest', 'mortgage-calculators-wp' ),
+		'value' => $curr_symbol . $principal_and_interest,
+	),
+	array(
+		'label' => __( 'Monthly Taxes', 'mortgage-calculators-wp' ),
+		'value' => $curr_symbol . $monthly_taxes,
+	),
+	array(
+		'label' => __( 'Monthly Insurance', 'mortgage-calculators-wp' ),
+		'value' => $curr_symbol . $monthly_insurance,
+	),
+	array(
+		'label' => __( 'Monthly HOA', 'mortgage-calculators-wp' ),
+		'value' => $curr_symbol . $monthly_hoa,
+	),
+);
 
-$body      .= "<div style='font-family:Arial;font-size: 13px;padding:0 10px;'>
-    <p style='line-height: 20px; max-width: 500px'>$wpmc_mail_message</p>
-    " . ( ! empty( $body_part_dynamic ) ? $body_part_dynamic : $body_part_static ) . '
-  </div>';
+$body = mcwp_email_template(
+	array(
+		'calc_type'   => __( 'Conventional Loan', 'mortgage-calculators-wp' ),
+		'subtitle'    => $_term . ' ' . __( 'Year Fixed', 'mortgage-calculators-wp' ),
+		'total'       => $curr_symbol . $calculation_result,
+		'message'     => $wpmc_mail_message,
+		'rows'        => $rows,
+		'curr_symbol' => $curr_symbol,
+		'disclaimer'  => $option_func( 'wpmc_one_disclaimer' ),
+	)
+);
+
 $cc_subject = __( 'New Conventional Calculation by ', 'mortgage-calculators-wp' ) . $to;
-$href       = esc_attr( 'mailto:' . $to );
-$cc_body    = "<div style='font-family:Arial;font-size: 13px;padding:0 10px;'><p><a href='$href'>" . __( 'Click Here', 'mortgage-calculators-wp' ) . '</a> ' . __( 'to follow up with', 'mortgage-calculators-wp' ) . " $to. " . __( 'They requested a calculation and a copy of the email they received is below for reference', 'mortgage-calculators-wp' ) . ':</p><em>' . ( ! empty( $body_part_dynamic ) ? $body_part_dynamic : $body_part_static ) . '</em></div>';
+$cc_body    = mcwp_cc_email_template( $to, __( 'Conventional', 'mortgage-calculators-wp' ), $body );

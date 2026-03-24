@@ -1,6 +1,6 @@
 <?php
 /**
- * Main license template.
+ * Main admin template.
  *
  * @package mortgage_calculator
  *
