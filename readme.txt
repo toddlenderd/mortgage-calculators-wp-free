@@ -3,7 +3,7 @@ Contributors: (8blocks)
 Donate link: http://wordpress.org
 Tags: mortgage, mortgage calculator, loan calculator, real estate, mortgage calc
 Requires at least: 4.6
-Stable tag: 1.62
+Stable tag: 1.63
 Tested up to: 6.9.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -58,6 +58,29 @@ Yes you can. We have provided a color picker that will change the look/feel of y
 First Version! Enjoy!
 
 == Changelog ==
+= 1.63 20260324 =
+
+* Added CSRF/nonce protection to AJAX email endpoint
+* Fixed VA funding fee logic for 1-4% down payment range
+* Fixed conventional interest rate slider not displaying percent sign
+* Fixed roundOff() ignoring precision parameter; all values round to 2 decimal places
+* Fixed implicit global variables throughout calculator JS
+* Fixed refinance calculator monthly savings truncation
+* Replaced deprecated $new_whitelist_options with $new_allowed_options
+* Fixed "Mortage" typo in admin menu (now "Mortgage")
+* Prefixed generic function names (checksettings, body_dynamic, email_headers, etc.)
+* Admin scripts now only load on plugin settings page
+* Moved textdomain loading from after_setup_theme to init hook
+* Replaced inline wp_head style with wp_add_inline_style()
+* Changed require_once to require in shortcode views for multiple instance support
+* Added proper version strings to enqueued assets
+* Used wp_safe_redirect() instead of wp_redirect() for network options
+* Sanitized email header values with sanitize_email()
+* Added wp_kses_post() sanitization on email template message/disclaimer output
+* Fixed untranslatable strings in MHA email and RC view
+* Removed jQuery Migrate removal that could break other plugins
+* Added MCWP_VERSION constant for centralized version management
+
 = 1.62 20260324 =
 
 * Updated conventional email to styled card template

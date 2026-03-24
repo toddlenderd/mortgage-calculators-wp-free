@@ -2,16 +2,15 @@ var $mcwp = jQuery.noConflict();
 $mcwp(function($) {
 
     $(document).on('click', '.mcwp-submit', function(e) {
-        //$('.wpmc-submit').on('click',function(e) {
         e.preventDefault();
 
         var forma = $(this).closest('form');
-        var serializaFrom = $(forma).serializeArray();
         var post_data = {};
         $.each($(forma).serializeArray(), function() {
             post_data[this.name] = this.value;
         });
-        currentFormEmail = $('input[type="email"]', forma).val();
+        post_data.mcwp_nonce = mcwp_ajax.nonce;
+        var currentFormEmail = $('input[type="email"]', forma).val();
         if (!validateEmail(currentFormEmail)) {
             alert('Your Email is not valid!');
             return false;
@@ -31,28 +30,28 @@ $mcwp(function($) {
     $(".ex1").bootstrapSlider();
 
     function addCommas(intNum) {
-        val = intNum;
+        var val = intNum;
         var parts = val.toString().split(".");
         parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         return parts.join(".");
     }
 
     function removeco(val) {
-        /*replace string replace to global string replace function to global replacement*/
-        /*return val.replace(',','');	*/
         return val.replace(/,/g, "");
     }
+
+    function roundOff(number, precision) {
+        var num = Number(number);
+        var p = (typeof precision !== 'undefined') ? precision : 2;
+        return num.toFixed(p);
+    }
+
     /****************************************************************************************************************************************
     Conventional Calculator
     **************************************************************************************************************************************/
-    /*
-    if ($('#inp_purchase_price').val()) {
-    };
-    */
     $('form.mcalc-conventional').each(function() {
 
         var $parent = $(this);
-        //mortgage_calc(purchase_price, down_payment, interest_rate, mortgage_term, monthly_tax, monthly_insurance, monthly_hoa, annual_tax_percent);
         var purchase_price = removeco($("#inp_purchase_price", $parent).val());
         var down_payment_percent = $(".down_payment_scrl", $parent).val();
         var down_payment = (purchase_price * down_payment_percent) / 100;
@@ -68,27 +67,16 @@ $mcwp(function($) {
         mortgage_calc($parent);
 
         $parent.find('#mortgage_term_yr').on('change', function(event) {
-            //$(document).on('change', '#mortgage_term_yr', function () {
-            //purchase * down payment
-            if (this.value == 15) {
-                mortgage_term_yr = .0045
-            } else {
-                mortgage_term_yr = .0085
-            }
-            //mortgage_calc(purchase_price, down_payment, interest_rate, this.value, monthly_tax, monthly_insurance, monthly_hoa, annual_tax_percent);
             mortgage_calc($parent);
         });
 
-        //mortgage_calc($parent);
         $parent.find('#monthly_hoa_inp').on('keyup', function(event) {
-            //hideShowLayer(markerLayer);
             monthly_hoa = $(this).val() == "" ? 0 : $(this).val();
             $(this).val(function(index, value) {
                 return value
                     .replace(/\D/g, "")
                     .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             });
-            //mortgage_calc(purchase_price, down_payment, interest_rate, mortgage_term, monthly_tax, monthly_insurance, monthly_hoa, annual_tax_percent);
             mortgage_calc($parent);
         });
 
@@ -98,7 +86,6 @@ $mcwp(function($) {
                 $(this).next("p").text(roundOff(down_payment_percent) + "%");
                 down_payment = (purchase_price * down_payment_percent) / 100;
                 $("#down_payment_inp", $parent).val(addCommas(down_payment));
-                //mortgage_calc(purchase_price, down_payment, interest_rate, mortgage_term, monthly_tax, monthly_insurance, monthly_hoa, annual_tax_percent);
             }
             if ($(this).hasClass("annual_tax_scrl")) {
                 annual_tax_percent = slideEvt.value.newValue;
@@ -106,12 +93,10 @@ $mcwp(function($) {
                 annual_tax = (purchase_price * annual_tax_percent) / 100;
                 monthly_tax = (annual_tax / 12);
                 $("#annual_tax_inp", $parent).val(addCommas(roundOff(annual_tax)));
-                //mortgage_calc(purchase_price, down_payment, interest_rate, mortgage_term, monthly_tax, monthly_insurance, monthly_hoa, annual_tax_percent);
             }
             if ($(this).hasClass("interest_rate_scrl")) {
                 interest_rate = slideEvt.value.newValue;
-                $(this).next("p").text(interest_rate) + "%";
-                //mortgage_calc(purchase_price, down_payment, interest_rate, mortgage_term, monthly_tax, monthly_insurance, monthly_hoa, annual_tax_percent);
+                $(this).next("p").text(interest_rate + "%");
             }
             mortgage_calc($parent);
         });
@@ -167,26 +152,25 @@ $mcwp(function($) {
 
 
     });
-    //function mortgage_calc(price, down, rate, term, tax, insurance, hoa) {
+
     function mortgage_calc($parent) {
-        price = removeco($("#inp_purchase_price", $parent).val());
-        down_payment_percent = $(".down_payment_scrl", $parent).val();
-        down = (price * down_payment_percent) / 100;
-        rate = $(".interest_rate_scrl", $parent).val();
-        term = $("#mortgage_term_yr", $parent).val();
-        //annual_tax_percent = $(".annual_tax_scrl", $parent).val();
-        annual_tax_percentNew = $(".annual_tax_scrl", $parent).next("p").text();
+        var price = removeco($("#inp_purchase_price", $parent).val());
+        var down_payment_percent = $(".down_payment_scrl", $parent).val();
+        var down = (price * down_payment_percent) / 100;
+        var rate = $(".interest_rate_scrl", $parent).val();
+        var term = $("#mortgage_term_yr", $parent).val();
+        var annual_tax_percentNew = $(".annual_tax_scrl", $parent).next("p").text();
         annual_tax_percentNew = annual_tax_percentNew.replace("%", "");
-        annual_tax = (price * annual_tax_percentNew) / 100;
-        tax = (annual_tax / 12);
-        insurance = removeco($("#annual_insurance_inp", $parent).val()) / 12;
-        hoa = removeco($("#monthly_hoa_inp").val()) == "" ? 0 : removeco($("#monthly_hoa_inp", $parent).val())
+        var annual_tax = (price * annual_tax_percentNew) / 100;
+        var tax = (annual_tax / 12);
+        var insurance = removeco($("#annual_insurance_inp", $parent).val()) / 12;
+        var hoa = removeco($("#monthly_hoa_inp", $parent).val()) == "" ? 0 : removeco($("#monthly_hoa_inp", $parent).val());
         var n = parseInt(term) * 12;
         var c = parseFloat(rate) / 1200;
         var L = parseInt(price) - parseFloat(down);
         var p = Math.round((L * (c * Math.pow(1 + c, n))) / (Math.pow(1 + c, n) - 1));
         var emmp = parseFloat(p) + parseFloat(tax) + parseFloat(insurance) + parseFloat(hoa);
-        changethis = roundOff(emmp, 2);
+        var changethis = roundOff(emmp, 2);
         $("#emmp_div_span", $parent).text(addCommas(roundOff(emmp, 2)));
         $("#pi_div_span", $parent).text(addCommas(p));
         $("#mtax_div_span", $parent).text(addCommas(roundOff(tax, 2)));
@@ -198,8 +182,6 @@ $mcwp(function($) {
         $(".mtax_div_span", $parent).val(addCommas(roundOff(tax, 2)));
         $(".minsure_div_span", $parent).val(addCommas(roundOff(insurance, 2)));
         $(".hoa_div_span", $parent).val(addCommas(hoa));
-        //$("#down_payment_inp", $parent).val(addCommas(down));
-        //$("#annual_tax_inp", $parent).val(addCommas(annual_tax));
     }
     /****************************************************************************************************************************************
     FHA Calculator
@@ -220,7 +202,7 @@ $mcwp(function($) {
         $("#fha_down_payment_inp").val(addCommas(fha_down_payment));
         $("#fha_annual_tax_inp").val(addCommas(fha_annual_tax));
         fha_mortgage_calc(fha_purchase_price, fha_down_payment, fha_interest_rate, fha_mortgage_term, fha_monthly_tax, fha_annual_tax_percent, fha_monthly_insurance, fha_monthly_hoa);
-    };
+    }
     $(document).on('change', '#fha_mortgage_term_yr', function() {
         fha_mortgage_calc(fha_purchase_price, fha_down_payment, fha_interest_rate, this.value, fha_monthly_tax, fha_annual_tax_percent, fha_monthly_insurance, fha_monthly_hoa);
     });
@@ -250,7 +232,6 @@ $mcwp(function($) {
         fha_down_payment_percent = Number($(".fha_down_payment_scrl").val());
         fha_purchase_price = $(this).val() == "" ? 0 : removeco($(this).val());
         fha_down_payment = (fha_purchase_price * fha_down_payment_percent) / 100;
-        fha_down_payment = fha_down_payment;
         $("#fha_down_payment_inp").val(addCommas(fha_down_payment));
         $(this).val(function(index, value) {
             return value
@@ -278,7 +259,7 @@ $mcwp(function($) {
         fha_annual_tax_percent = (fha_annual_tax / fha_purchase_price) * 100;
         $(".fha_annual_tax_scrl").bootstrapSlider('setValue', fha_annual_tax_percent).next("p").text(roundOff(fha_annual_tax_percent) + "%");
         $(this).val(function(index, value) {
-            newval = value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            var newval = value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             return newval;
         });
         fha_mortgage_calc(fha_purchase_price, fha_down_payment, fha_interest_rate, fha_mortgage_term, fha_monthly_tax, fha_annual_tax_percent, fha_monthly_insurance, fha_monthly_hoa);
@@ -322,19 +303,13 @@ $mcwp(function($) {
         rate = $(".fha_interest_rate_scrl").val();
         term = $("#fha_mortgage_term_yr").val();
 
-        //tax_prcnt = $(".fha_annual_tax_scrl").val();
-        //fha_annual_tax = (price * tax_prcnt)/100;
-        //tax = (fha_annual_tax/12);
-
         insurance = removeco($("#fha_annual_insurance_inp").val()) / 12;
-        //monthly_mortgage_insurance = ($("#fha_mmi_div_span").val()/200);
         hoa = removeco($("#fha_monthly_hoa_inp").val()) == "" ? 0 : removeco($("#fha_monthly_hoa_inp").val());
 
         var n = parseInt(term) * 12;
         var c = parseFloat(rate) / 1200;
         var L = parseInt(price) - parseFloat(down);
         var p = Math.round((L * (c * Math.pow(1 + c, n))) / (Math.pow(1 + c, n) - 1));
-        //var arr = {PI:p, EMMP:parseInt(p)+parseInt(tax)+parseInt(insurance)+parseInt(hoa)};
         if (term == 15) {
             tax_prcnt = 0.45;
         } else if (term == 30) {
@@ -382,7 +357,7 @@ $mcwp(function($) {
         $("#va_down_payment_inp").val(addCommas(va_down_payment));
         $("#va_annual_tax_inp").val(addCommas(va_annual_tax));
         va_mortgage_calc(va_purchase_price, va_down_payment, va_interest_rate, va_mortgage_term, va_monthly_tax, va_down_payment_percent, va_monthly_insurance, va_monthly_hoa);
-    };
+    }
     $(document).on('change', '#va_mortgage_term_yr', function() {
         va_mortgage_calc(va_purchase_price, va_down_payment, va_interest_rate, this.value, va_monthly_tax, va_down_payment_percent, va_monthly_insurance, va_monthly_hoa);
     });
@@ -482,110 +457,89 @@ $mcwp(function($) {
         var va_purchase_price = $("#va_inp_purchase_price").val();
         price = removeco(va_purchase_price);
 
-        va_down_payment_percent = $(".va_down_payment_scrl").val();
+        var va_down_payment_percent = $(".va_down_payment_scrl").val();
         down = (price * va_down_payment_percent) / 100;
 
         rate = $(".va_interest_rate_scrl").val();
         term = $("#va_mortgage_term_yr").val();
-        va_annual_tax_percent = $(".va_annual_tax_scrl").val();
-        va_annual_tax = (price * va_annual_tax_percent) / 100;
+        var va_annual_tax_percent = $(".va_annual_tax_scrl").val();
+        var va_annual_tax = (price * va_annual_tax_percent) / 100;
         tax = (va_annual_tax / 12);
         insurance = (removeco($("#va_annual_insurance_inp").val()) / 12);
         hoa = removeco($("#va_monthly_hoa_inp").val()) == "" ? 0 : removeco($("#va_monthly_hoa_inp").val());
 
-        //console.warn("purchase_price "+purchase_price+", down_payment "+down_payment+", interest_rate "+interest_rate+", mortgage_term "+mortgage_term)
-        e_rate = 0;
-        //console.log(down_prcnt);
+        var e_rate = 0;
         if ($("#va_frist_time").val() == "yes") {
             if ($("#va_service_type").val() == "regular_military") {
-                if (down_prcnt == 0) {
+                if (down_prcnt < 5) {
                     e_rate = 2.15;
-                }
-                if (down_prcnt >= 5 && down_prcnt < 10) {
+                } else if (down_prcnt >= 5 && down_prcnt < 10) {
                     e_rate = 1.50;
-                }
-                if (down_prcnt >= 10) {
+                } else if (down_prcnt >= 10) {
                     e_rate = 1.25;
                 }
             }
             if ($("#va_service_type").val() == "reserves_national") {
-                if (down_prcnt == 0) {
+                if (down_prcnt < 5) {
                     e_rate = 2.4;
-                }
-                if (down_prcnt >= 5 && down_prcnt < 10) {
+                } else if (down_prcnt >= 5 && down_prcnt < 10) {
                     e_rate = 1.75;
-                }
-                if (down_prcnt >= 10) {
+                } else if (down_prcnt >= 10) {
                     e_rate = 1.5;
                 }
             }
         } else if ($("#va_frist_time").val() == "no") {
             if ($("#va_service_type").val() == "regular_military") {
-                if (down_prcnt == 0) {
+                if (down_prcnt < 5) {
                     e_rate = 3.3;
-                }
-                if (down_prcnt >= 5 && down_prcnt < 10) {
+                } else if (down_prcnt >= 5 && down_prcnt < 10) {
                     e_rate = 1.50;
-                }
-                if (down_prcnt >= 10) {
+                } else if (down_prcnt >= 10) {
                     e_rate = 1.25;
                 }
             }
             if ($("#va_service_type").val() == "reserves_national") {
-                if (down_prcnt == 0) {
+                if (down_prcnt < 5) {
                     e_rate = 3.3;
-                }
-                if (down_prcnt >= 5 && down_prcnt < 10) {
+                } else if (down_prcnt >= 5 && down_prcnt < 10) {
                     e_rate = 1.75;
-                }
-                if (down_prcnt >= 10) {
+                } else if (down_prcnt >= 10) {
                     e_rate = 1.5;
                 }
             }
         }
-        //price, down, rate, term, tax, down_prcnt, insurance, hoa
         var n = parseInt(term) * 12;
         var c = parseFloat(rate) / 1200;
         var L = parseInt(price) - parseFloat(down);
         var p = Math.round((L * (c * Math.pow(1 + c, n))) / (Math.pow(1 + c, n) - 1));
         var vaff = Math.round((L * e_rate) / 18000);
-        //var arr = {PI:p, EMMP:parseInt(p)+parseInt(tax)+parseInt(insurance)+parseInt(hoa)};
         var emmp = parseFloat(p) + parseFloat(tax) + parseFloat(insurance) + parseFloat(hoa) + parseFloat(vaff);
         $("#va_emmp_div_span").text(addCommas(roundOff(emmp, 2)));
         $("#va_pi_div_span").text(addCommas(p));
         $("#va_mtax_div_span").text(addCommas(roundOff(tax, 2)));
         $("#va_minsure_div_span").text(addCommas(roundOff(insurance, 2)));
         $("#va_hoa_div_span").text(addCommas(hoa));
-        //$("#va_funding_fee_div_span").text(addCommas(hoa));
         $("#va_purchase_p_span").text(addCommas(price));
-        $("#va_funding_fee_p_span").html(addCommas((L * e_rate) / 100));
-        va_funding_fee_p_span = removeco($("#va_funding_fee_p_span").text());
+        $("#va_funding_fee_p_span").html(addCommas(roundOff((L * e_rate) / 100, 2)));
+        var va_funding_fee_p_span = removeco($("#va_funding_fee_p_span").text());
         va_funding_fee_p_span = Number(va_funding_fee_p_span);
-        //(Purchase Price - Down Payment) + VA Funding Fee
         va_purchase_price = removeco($("#va_inp_purchase_price").val());
         va_purchase_price = Number(va_purchase_price);
         va_down_payment_percent = $(".va_down_payment_scrl").val();
         va_down_payment_percent = Number(va_down_payment_percent);
-        va_down_payment = (va_purchase_price * va_down_payment_percent) / 100;
-        va_amount_finance_p_span = (va_purchase_price - va_down_payment) + va_funding_fee_p_span;
-        $("#va_amount_finance_p_span").html(addCommas(roundOff(Number(va_amount_finance_p_span))));
+        var va_down_payment = (va_purchase_price * va_down_payment_percent) / 100;
+        var va_amount_finance_p_span = (va_purchase_price - va_down_payment) + va_funding_fee_p_span;
+        $("#va_amount_finance_p_span").html(addCommas(roundOff(Number(va_amount_finance_p_span), 2)));
 
         $(".va_emmp_div_span").val($("#va_emmp_div_span").text());
         $(".va_pi_div_span").val($("#va_pi_div_span").text());
         $(".va_mtax_div_span").val($("#va_mtax_div_span").text());
         $(".va_minsure_div_span").val($("#va_minsure_div_span").text());
         $(".va_hoa_div_span").val($("#va_hoa_div_span").text());
-        //$("#va_funding_fee_div_span").val($("#va_funding_fee_div_span").text());.text());
-        //$(".va_purchase_p_span").val($("#va_purchase_p_span").text());
         $(".va_funding_fee_p_span").val($("#va_funding_fee_p_span").text());
         $(".va_amount_finance_p_span").val($("#va_amount_finance_p_span").text());
-        //$("#va_amount_finance_p_span").html(addCommas(parseInt(L)+((L*e_rate)/100)));
     }
 
-    function roundOff(number, precision) {
-        num = number;
-        return num.toFixed(2);
-    }
     /****************************************************************************************************************************************
     Home Affordability Calculator
     **************************************************************************************************************************************/
@@ -596,7 +550,6 @@ $mcwp(function($) {
         $("#mha_interest_rate").val(addCommas(mha_interest_rate));
         var mha_monthly_debts = removeco($("#mha_monthly_debts").val());
         $("#mha_monthly_debts").val(addCommas(mha_monthly_debts));
-
         var mha_estimated_annual_home_insurance = removeco($("#mha_estimated_annual_home_insurance").val());
         $("#mha_estimated_annual_home_insurance").val(addCommas(mha_estimated_annual_home_insurance));
         var mha_estimated_annual_property_taxes = removeco($("#mha_estimated_annual_property_taxes").val());
@@ -614,16 +567,8 @@ $mcwp(function($) {
             if (mha_monthly_debts == '' || mha_monthly_debts < minimum_monthly_debts) {
                 var mha_est_monthly_payment = ((mha_annual_income / 12) * 0.40) - minimum_monthly_debts;
 
-                if (mha_estimated_annual_property_taxes != '') {
-                    var mha_taxes = mha_estimated_annual_property_taxes / 12;
-                } else {
-                    var mha_taxes = 0;
-                }
-                if (mha_estimated_annual_home_insurance != '') {
-                    var mha_insurance = mha_estimated_annual_home_insurance / 12;
-                } else {
-                    var mha_insurance = 0;
-                }
+                var mha_taxes = (mha_estimated_annual_property_taxes != '') ? mha_estimated_annual_property_taxes / 12 : 0;
+                var mha_insurance = (mha_estimated_annual_home_insurance != '') ? mha_estimated_annual_home_insurance / 12 : 0;
                 var mha_P_I = mha_est_monthly_payment - (mha_taxes + mha_insurance);
 
                 var aaaaa = (mha_interest_rate / 100 / 12);
@@ -631,50 +576,18 @@ $mcwp(function($) {
                 var bbbbb = (1 - (mpowerdata));
                 var ab = bbbbb / aaaaa;
 
-                if (ab < 0) {
-                    var temp = ab * mha_P_I;
-                    var ab_total = temp - parseInt(mha_down_payment);
-                } else {
-                    var temp = ab * mha_P_I;
-                    var ab_total = temp + parseInt(mha_down_payment);
-                }
-                if (ab_total <= 0) {
-                    $("#mha_afford_house_div_span").html('0');
-                } else {
-                    $("#mha_afford_house_div_span").html(Number(Math.round(ab_total)).toLocaleString('en'));
-                }
-                if (mha_est_monthly_payment <= 0) {
-                    $("#mha_emmp_div_span").html('0');
-                } else {
-                    $("#mha_emmp_div_span").html(Number(Math.round(mha_est_monthly_payment)).toLocaleString('en'));
-                }
-                if (mha_P_I <= 0) {
-                    $("#mha_pi_div_span").html('0');
-                } else {
-                    $("#mha_pi_div_span").html(Number(Math.round(mha_P_I)).toLocaleString('en'));
-                }
-                if (mha_taxes <= 0) {
-                    $("#mha_taxes_div_span").html('0');
-                } else {
-                    $("#mha_taxes_div_span").html(Number(Math.round(mha_taxes)).toLocaleString('en'));
-                }
-                if (mha_insurance <= 0) {
-                    $("#mha_insurance_div_span").html('0');
-                } else {
-                    $("#mha_insurance_div_span").html(Number(Math.round(mha_insurance)).toLocaleString('en'));
-                }
+                var temp = ab * mha_P_I;
+                var ab_total = (ab < 0) ? temp - parseInt(mha_down_payment) : temp + parseInt(mha_down_payment);
+
+                $("#mha_afford_house_div_span").html(ab_total <= 0 ? '0' : addCommas(roundOff(Math.round(ab_total), 2)));
+                $("#mha_emmp_div_span").html(mha_est_monthly_payment <= 0 ? '0' : addCommas(roundOff(Math.round(mha_est_monthly_payment), 2)));
+                $("#mha_pi_div_span").html(mha_P_I <= 0 ? '0' : addCommas(roundOff(Math.round(mha_P_I), 2)));
+                $("#mha_taxes_div_span").html(mha_taxes <= 0 ? '0' : addCommas(roundOff(Math.round(mha_taxes), 2)));
+                $("#mha_insurance_div_span").html(mha_insurance <= 0 ? '0' : addCommas(roundOff(Math.round(mha_insurance), 2)));
             } else {
                 var mha_est_monthly_payment = ((mha_annual_income / 12) * 0.40) - mha_monthly_debts;
-                if (mha_estimated_annual_property_taxes != '') {
-                    var mha_taxes = mha_estimated_annual_property_taxes / 12;
-                } else {
-                    var mha_taxes = 0;
-                }
-                if (mha_estimated_annual_home_insurance != '') {
-                    var mha_insurance = mha_estimated_annual_home_insurance / 12;
-                } else {
-                    var mha_insurance = 0;
-                }
+                var mha_taxes = (mha_estimated_annual_property_taxes != '') ? mha_estimated_annual_property_taxes / 12 : 0;
+                var mha_insurance = (mha_estimated_annual_home_insurance != '') ? mha_estimated_annual_home_insurance / 12 : 0;
                 var mha_P_I = mha_est_monthly_payment - (mha_taxes + mha_insurance);
 
                 var aaaaa = (mha_interest_rate / 100 / 12);
@@ -682,39 +595,14 @@ $mcwp(function($) {
                 var bbbbb = (1 - (mpowerdata));
                 var ab = bbbbb / aaaaa;
 
-                if (ab < 0) {
-                    var temp = ab * mha_P_I;
-                    var ab_total = temp - parseInt(mha_down_payment);
-                } else {
-                    var temp = ab * mha_P_I;
-                    var ab_total = temp + parseInt(mha_down_payment);
-                }
+                var temp = ab * mha_P_I;
+                var ab_total = (ab < 0) ? temp - parseInt(mha_down_payment) : temp + parseInt(mha_down_payment);
 
-                if (ab_total <= 0) {
-                    $("#mha_afford_house_div_span").html('0');
-                } else {
-                    $("#mha_afford_house_div_span").html(Number(Math.round(ab_total)).toLocaleString('en'));
-                }
-                if (mha_est_monthly_payment <= 0) {
-                    $("#mha_emmp_div_span").html('0');
-                } else {
-                    $("#mha_emmp_div_span").html(Number(Math.round(mha_est_monthly_payment)).toLocaleString('en'));
-                }
-                if (mha_P_I <= 0) {
-                    $("#mha_pi_div_span").html('0');
-                } else {
-                    $("#mha_pi_div_span").html(Number(Math.round(mha_P_I)).toLocaleString('en'));
-                }
-                if (mha_taxes <= 0) {
-                    $("#mha_taxes_div_span").html('0');
-                } else {
-                    $("#mha_taxes_div_span").html(Number(Math.round(mha_taxes)).toLocaleString('en'));
-                }
-                if (mha_insurance <= 0) {
-                    $("#mha_insurance_div_span").html('0');
-                } else {
-                    $("#mha_insurance_div_span").html(Number(Math.round(mha_insurance)).toLocaleString('en'));
-                }
+                $("#mha_afford_house_div_span").html(ab_total <= 0 ? '0' : addCommas(roundOff(Math.round(ab_total), 2)));
+                $("#mha_emmp_div_span").html(mha_est_monthly_payment <= 0 ? '0' : addCommas(roundOff(Math.round(mha_est_monthly_payment), 2)));
+                $("#mha_pi_div_span").html(mha_P_I <= 0 ? '0' : addCommas(roundOff(Math.round(mha_P_I), 2)));
+                $("#mha_taxes_div_span").html(mha_taxes <= 0 ? '0' : addCommas(roundOff(Math.round(mha_taxes), 2)));
+                $("#mha_insurance_div_span").html(mha_insurance <= 0 ? '0' : addCommas(roundOff(Math.round(mha_insurance), 2)));
             }
         }
     }
@@ -784,52 +672,47 @@ $mcwp(function($) {
             var nleft_data = (rc_new_interest_rate / 100 / 12) * rc_new_loan_amount;
             var nmpowerdata = Math.pow((1 + (rc_new_interest_rate / 100 / 12)), (-rc_new_loan_term));
             var nright_data = (1 - (nmpowerdata));
-            newloanpayment = nleft_data / nright_data;
+            var newloanpayment = nleft_data / nright_data;
             $("#rc_afford_house_div_span").html('0');
-            $("#rc_emmp_div_span").html(Number(Math.round(newloanpayment)).toLocaleString('en'));
+            $("#rc_emmp_div_span").html(addCommas(roundOff(newloanpayment, 2)));
             $("#rc_pi_div_span").html('0');
             $("#rc_lifetime_div_span").html('0');
         } else {
-
 
             var cleft_data = (rc_interest_rate / 100 / 12) * rc_original_loan_amount;
             var mpowerdata = Math.pow((1 + (rc_interest_rate / 100 / 12)), (-rc_current_term));
 
             var cright_data = (1 - (mpowerdata));
-            currentloanpayment = cleft_data / cright_data;
+            var currentloanpayment = cleft_data / cright_data;
 
             var nleft_data = (rc_new_interest_rate / 100 / 12) * rc_new_loan_amount;
             var nmpowerdata = Math.pow((1 + (rc_new_interest_rate / 100 / 12)), (-rc_new_loan_term));
             var nright_data = (1 - (nmpowerdata));
-            newloanpayment = nleft_data / nright_data;
-            monthlysavings = currentloanpayment - newloanpayment;
-            $("#rc_afford_house_div_span").html(Number(Math.round(monthlysavings)).toLocaleString('en'));
+            var newloanpayment = nleft_data / nright_data;
+            var monthlysavings = currentloanpayment - newloanpayment;
+            $("#rc_afford_house_div_span").html(addCommas(roundOff(monthlysavings, 2)));
 
-            if (Number(Math.round(monthlysavings)).toLocaleString('en') == 0) {
+            if (Math.round(monthlysavings) == 0) {
                 $("#rc_emmp_div_span").html('0');
                 $("#rc_pi_div_span").html('0');
-                $("#rc_lifetime_div_span").html('0')
+                $("#rc_lifetime_div_span").html('0');
             } else {
 
-                $("#rc_emmp_div_span").html(Number(Math.round(newloanpayment)).toLocaleString('en'));
-                $("#rc_pi_div_span").html(Number(Math.round(rc_new_refinance_fees)).toLocaleString('en'));
+                $("#rc_emmp_div_span").html(addCommas(roundOff(newloanpayment, 2)));
+                $("#rc_pi_div_span").html(addCommas(roundOff(rc_new_refinance_fees, 2)));
 
                 var current_year = new Date().getFullYear();
                 if (rc_origination_year <= current_year) {
                     rc_origination_year = parseInt(rc_origination_year);
-                    
                     monthlysavings = Math.round(monthlysavings);
                     newloanpayment = parseInt(newloanpayment);
                     rc_new_loan_term = parseInt(rc_new_loan_term);
                     rc_new_refinance_fees = parseInt(rc_new_refinance_fees);
                     rc_current_term = parseInt(rc_current_term);
 
-                    var newcurrentloanpayment = removeco($("#rc_original_loan_amount").val());
-                    newcurrentloanpayment = parseInt(newcurrentloanpayment);
+                    var lifetimesavings = currentloanpayment * (rc_current_term - (((current_year - rc_origination_year) * 12)) - 6) - ((newloanpayment * rc_new_loan_term) + rc_new_refinance_fees);
 
-                    lifetimesavings = currentloanpayment * (rc_current_term - (((current_year - rc_origination_year) * 12)) - 6) - ((newloanpayment * rc_new_loan_term) + rc_new_refinance_fees);
-
-                    $("#rc_lifetime_div_span").html(Number(Math.round(lifetimesavings)).toLocaleString('en'));
+                    $("#rc_lifetime_div_span").html(addCommas(roundOff(lifetimesavings, 2)));
                 }
             }
         }

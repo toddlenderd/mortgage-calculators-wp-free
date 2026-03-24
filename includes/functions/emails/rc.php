@@ -17,14 +17,14 @@ $rc_new_loan_term       = isset( $_POST['new_loan_term'] ) ? sanitize_text_field
 
 $option_func = ( use_network_settings( 'wpmc_six_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 $wpmc_admin  = $option_func( 'wpmc_six_email' );
-$site_admin  = checksettings( 'admin_email' );
+$site_admin  = mcwp_checksettings( 'admin_email' );
 $subject     = __( 'Your Refinance Calculation', 'mortgage-calculators-wp' );
 
 // Dynamically Create the Body.
 $msg_body = $option_func( 'wpmc_six_msg_bdy' );
 
 $current_post      = map_deep( $_REQUEST, 'wp_kses_post' );
-$body_part_dynamic = body_dynamic( $msg_body, $_REQUEST );
+$body_part_dynamic = mcwp_body_dynamic( $msg_body, $_REQUEST );
 
 // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 $forPara = __( 'Principal & Interest', 'mortgage-calculators-wp' );

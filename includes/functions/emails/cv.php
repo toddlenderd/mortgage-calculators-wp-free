@@ -19,7 +19,7 @@ $monthly_mortgage_insurance = isset( $_POST['monthly_mortgage_insurance'] ) ? sa
 $monthly_hoa                = isset( $_POST['monthly_hoa'] ) ? sanitize_text_field( wp_unslash( $_POST['monthly_hoa'] ) ) : '';
 $option_func                = ( use_network_settings( 'wpmc_one_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 $wpmc_admin                 = $option_func( 'wpmc_one_email' );
-$site_admin                 = checksettings( 'admin_email' );
+$site_admin                 = mcwp_checksettings( 'admin_email' );
 
 $subject = __( 'Your Conventional Mortgage Calculation', 'mortgage-calculators-wp' );
 

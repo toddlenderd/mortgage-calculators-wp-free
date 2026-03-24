@@ -19,8 +19,8 @@ function wpmc_update_network_options() {
 	// Check that the request is coming from the administration area.
 	check_admin_referer( $page_slug . '-options' );
 	// Cycle through the settings we're submitting. If there are any changes, update them.
-	global $new_whitelist_options;
-	$options = $new_whitelist_options[ $page_slug ];
+	global $new_allowed_options;
+	$options = isset( $new_allowed_options[ $page_slug ] ) ? $new_allowed_options[ $page_slug ] : array();
 
 	foreach ( $options as $option ) {
 		if ( isset( $_POST[ $option ] ) ) {
@@ -50,8 +50,7 @@ function wpmc_update_network_options() {
 		$query_args['action'] = 'cal-six';
 	}
 	$query_args['settings-updated'] = 'true';
-	// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
-	wp_redirect( add_query_arg( $query_args, network_admin_url( 'admin.php' ) ) );
+	wp_safe_redirect( add_query_arg( $query_args, network_admin_url( 'admin.php' ) ) );
 	exit();
 }
 add_action( 'network_admin_edit_wpmc_update_network_options', 'wpmc_update_network_options' );

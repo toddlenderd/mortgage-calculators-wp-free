@@ -33,19 +33,19 @@ function mcwp_shortcode( $atts = array(), $content = null, $tag = '' ) {
 
 	$wrap_class = '';
 	if ( 'cv' === $type ) {
-		require_once 'views/conventional.php';
+		require __DIR__ . '/views/conventional.php';
 		$wrap_class = 'mcalc-conventional';
 	} elseif ( 'fha' === $type ) {
-		require_once 'views/fha.php';
+		require __DIR__ . '/views/fha.php';
 		$wrap_class = 'mcalc-fha';
 	} elseif ( 'va' === $type ) {
-		require_once 'views/va.php';
+		require __DIR__ . '/views/va.php';
 		$wrap_class = 'mcalc-va';
 	} elseif ( 'mha' === $type ) {
-		require_once 'views/mha.php';
+		require __DIR__ . '/views/mha.php';
 		$wrap_class = 'mcalc-ha';
 	} elseif ( 'rc' === $type ) {
-		require_once 'views/rc.php';
+		require __DIR__ . '/views/rc.php';
 		$wrap_class = 'mcalc-refi';
 	}
 	$cal_form = '<form class="mcalc ' . $wrap_class . ' mcalc-color" name="' . $type . '" id="id_' . $type . '">
@@ -59,7 +59,7 @@ function mcwp_shortcode( $atts = array(), $content = null, $tag = '' ) {
 /**
  * Shortcodes init.
  */
-function wporg_shortcodes_init() {
+function mcwp_shortcodes_init() {
 	add_shortcode( 'mcwp', 'mcwp_shortcode' );
 }
-add_action( 'init', 'wporg_shortcodes_init' );
+add_action( 'init', 'mcwp_shortcodes_init' );
