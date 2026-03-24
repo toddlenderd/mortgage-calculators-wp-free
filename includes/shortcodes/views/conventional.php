@@ -1,21 +1,22 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /**
  * Conventional.
  *
  * @package mortgage_calculator
  */
 
-$option_func             = ( use_network_settings( 'wpmc_one_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
+$option_func             = ( mcwp_use_network_settings( 'wpmc_one_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 $mcwp_hide_insurance_one = $option_func( 'mcwp_hide_insurance_one' );
 $mcwp_hide_hoa_one       = $option_func( 'mcwp_hide_hoa_one' );
 
-$wpmc_one_dp_initial = calc_fields( 'cv', 'wpmc_one_dp_initial', '5' );
-$wpmc_one_ir_initial = calc_fields( 'cv', 'wpmc_one_ir_min', '5' );
-$wpmc_one_at_initial = calc_fields( 'cv', 'wpmc_one_at_initial', '1' ); // 1
+$wpmc_one_dp_initial = mcwp_calc_fields( 'cv', 'wpmc_one_dp_initial', '5' );
+$wpmc_one_ir_initial = mcwp_calc_fields( 'cv', 'wpmc_one_ir_min', '5' );
+$wpmc_one_at_initial = mcwp_calc_fields( 'cv', 'wpmc_one_at_initial', '1' ); // 1
 
-$show_hoa = ( 'yes' === $mcwp_hide_hoa_one ) ? '' : '<p>' . calc_fields( 'cv', 'wpmc_one_mhoa', __( 'Monthly HOA', 'mortgage-calculators-wp' ) ) . ' <strong class="mcalc-value">' . $curr_symbol . '<span id="hoa_div_span">1421</span></strong></p>';
+$show_hoa = ( 'yes' === $mcwp_hide_hoa_one ) ? '' : '<p>' . mcwp_calc_fields( 'cv', 'wpmc_one_mhoa', __( 'Monthly HOA', 'mortgage-calculators-wp' ) ) . ' <strong class="mcalc-value">' . $curr_symbol . '<span id="hoa_div_span">1421</span></strong></p>';
 
-$show_in = ( 'yes' === $mcwp_hide_insurance_one ) ? '' : '<p>' . calc_fields( 'cv', 'wpmc_one_ai', __( 'Monthly Insurance', 'mortgage-calculators-wp' ) ) . ' <strong class="mcalc-value">' . $curr_symbol . '<span id="minsure_div_span">1421</span></strong></p>';
+$show_in = ( 'yes' === $mcwp_hide_insurance_one ) ? '' : '<p>' . mcwp_calc_fields( 'cv', 'wpmc_one_ai', __( 'Monthly Insurance', 'mortgage-calculators-wp' ) ) . ' <strong class="mcalc-value">' . $curr_symbol . '<span id="minsure_div_span">1421</span></strong></p>';
 
 $wpmc_email     = $option_func( 'wpmc_one_email' );
 $admin_email    = $option_func( 'admin_email' );
@@ -25,12 +26,12 @@ $calculator_layout = '
 <div>
   <div class="mcalc-main">
     <div class="mcalc-half mcwp-purchase">
-      <label for="inp_purchase_price">' . calc_fields( 'cv', 'wpmc_one_pp', __( 'Purchase Price', 'mortgage-calculators-wp' ) ) . '</label>
+      <label for="inp_purchase_price">' . mcwp_calc_fields( 'cv', 'wpmc_one_pp', __( 'Purchase Price', 'mortgage-calculators-wp' ) ) . '</label>
       <i>' . $curr_symbol . '</i>
-      <input type="text" name="purchase_price" id="inp_purchase_price" value="' . calc_fields( 'cv', 'wpmc_one_pp_initial', '250,000' ) . '" class="mcalc-dollar">
+      <input type="text" name="purchase_price" id="inp_purchase_price" value="' . mcwp_calc_fields( 'cv', 'wpmc_one_pp_initial', '250,000' ) . '" class="mcalc-dollar">
     </div>
     <div class="mcalc-half mcwp-term">
-      <label for="mortgage_term_yr">' . calc_fields( 'cv', 'wpmc_one_mt', __( 'Mortgage Term', 'mortgage-calculators-wp' ) ) . '</label>
+      <label for="mortgage_term_yr">' . mcwp_calc_fields( 'cv', 'wpmc_one_mt', __( 'Mortgage Term', 'mortgage-calculators-wp' ) ) . '</label>
       <select name="mortgage_term" id="mortgage_term_yr">
         <option value="30">30 ' . __( 'Years', 'mortgage-calculators-wp' ) . '</option>
         <option value="25">25 ' . __( 'Years', 'mortgage-calculators-wp' ) . '</option>
@@ -41,7 +42,7 @@ $calculator_layout = '
       </select>
     </div>
     <div class="mcalc-half mcwp-down-payment">
-      <label class="mcalc-half" for="down_payment_inp">' . calc_fields( 'cv', 'wpmc_one_dp', __( 'Down Payment', 'mortgage-calculators-wp' ) ) . ' (' . $curr_symbol . ')</label>
+      <label class="mcalc-half" for="down_payment_inp">' . mcwp_calc_fields( 'cv', 'wpmc_one_dp', __( 'Down Payment', 'mortgage-calculators-wp' ) ) . ' (' . $curr_symbol . ')</label>
 
       <input type="text" name="down_payment" id="down_payment_inp" value=""  class="mcalc-half">
 
@@ -50,14 +51,14 @@ $calculator_layout = '
     </div>
 
     <div class="mcalc-half mcwp-taxes">
-      <label class="mcalc-half" for="annual_tax_inp">' . calc_fields( 'cv', 'wpmc_one_at', __( 'Annual Taxes', 'mortgage-calculators-wp' ) ) . ' (' . $curr_symbol . ')</label>
+      <label class="mcalc-half" for="annual_tax_inp">' . mcwp_calc_fields( 'cv', 'wpmc_one_at', __( 'Annual Taxes', 'mortgage-calculators-wp' ) ) . ' (' . $curr_symbol . ')</label>
       <input type="text" name="annual_taxes" id="annual_tax_inp" value="" class="mcalc-half">
       <input id="ex1 e2" class="ex1 annual_tax_scrl" data-slider-id="ex1Slider" type="text" data-slider-min="0" data-slider-max="20" data-slider-step="0.1" data-slider-value="' . $wpmc_one_at_initial . '" title="Tax Slider" />
       <p class="mcalc-percent">' . $wpmc_one_at_initial . '%</p>
     </div>
 
     <div class="mcalc-full mcwp-interest-rate">
-      <label for="ex1">' . calc_fields( 'cv', 'wpmc_one_ir', 'Interest Rate' ) . ' (%)</label>
+      <label for="ex1">' . mcwp_calc_fields( 'cv', 'wpmc_one_ir', 'Interest Rate' ) . ' (%)</label>
 
       <input id="ex1 e3" name="interest_rate" class="ex1 interest_rate_scrl" data-slider-id="ex1Slider" type="text" data-slider-min="1" data-slider-max="30" data-slider-step=".125" data-slider-value="' . $wpmc_one_ir_initial . '"/>
 
@@ -70,9 +71,9 @@ if ( 'yes' === $mcwp_hide_insurance_one ) {
     ';
 } else {
 	$calculator_layout .= '<div class="mcalc-half mcwp-insurance">
-      <label for="annual_insurance_inp">' . calc_fields( 'cv', 'wpmc_one_ai', __( 'Annual Insurance', 'mortgage-calculators-wp' ) ) . '</label>
+      <label for="annual_insurance_inp">' . mcwp_calc_fields( 'cv', 'wpmc_one_ai', __( 'Annual Insurance', 'mortgage-calculators-wp' ) ) . '</label>
       <i>' . $curr_symbol . '</i>
-      <input type="text" name="annual_insurance" id="annual_insurance_inp" value="' . calc_fields( 'cv', 'wpmc_one_ai_initial', '600' ) . '" class="mcalc-dollar">
+      <input type="text" name="annual_insurance" id="annual_insurance_inp" value="' . mcwp_calc_fields( 'cv', 'wpmc_one_ai_initial', '600' ) . '" class="mcalc-dollar">
     </div>';
 }
 
@@ -82,10 +83,10 @@ if ( 'yes' === $mcwp_hide_hoa_one ) {
     ';
 } else {
 	$calculator_layout .= '<div class="mcalc-half mcwp-hoa">
-      <label for="monthly_hoa_inp">' . calc_fields( 'cv', 'wpmc_one_mhoa', __( 'Monthly HOA', 'mortgage-calculators-wp' ) ) . '</label>
+      <label for="monthly_hoa_inp">' . mcwp_calc_fields( 'cv', 'wpmc_one_mhoa', __( 'Monthly HOA', 'mortgage-calculators-wp' ) ) . '</label>
       <i>' . $curr_symbol . '</i>
 
-      <input type="text" name="monthly_hoa_form" id="monthly_hoa_inp" value="' . calc_fields( 'cv', 'wpmc_one_mhoa_initial', '50' ) . '" class="mcalc-dollar">
+      <input type="text" name="monthly_hoa_form" id="monthly_hoa_inp" value="' . mcwp_calc_fields( 'cv', 'wpmc_one_mhoa_initial', '50' ) . '" class="mcalc-dollar">
 
     </div>';
 }
@@ -102,10 +103,10 @@ $calculator_layout .= '<div class="mcalc-full mcwp-results">
       </h2>
       <h3>' . __( 'Monthly Payment', 'mortgage-calculators-wp' ) . '</h3>
       <p class="mcwp-pi">' . __( 'Principal & Interest', 'mortgage-calculators-wp' ) . ' <strong class="mcalc-value">' . $curr_symbol . '<span id="pi_div_span">1421</span></strong></p>
-      <p class="mcwp-mt">' . calc_fields( 'cv', 'wpmc_one_at', __( 'Monthly Taxes', 'mortgage-calculators-wp' ) ) . ' <strong class="mcalc-value">' . $curr_symbol . '<span id="mtax_div_span">1421</span></strong></p>
+      <p class="mcwp-mt">' . mcwp_calc_fields( 'cv', 'wpmc_one_at', __( 'Monthly Taxes', 'mortgage-calculators-wp' ) ) . ' <strong class="mcalc-value">' . $curr_symbol . '<span id="mtax_div_span">1421</span></strong></p>
       ' . $show_hoa . '
       ' . $show_in . '
-      <small>' . calc_fields( 'cv', 'wpmc_one_disclaimer', '' ) . '</small>
+      <small>' . mcwp_calc_fields( 'cv', 'wpmc_one_disclaimer', '' ) . '</small>
     </div>
   </div>
 </div>';

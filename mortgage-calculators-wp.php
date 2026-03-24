@@ -99,7 +99,7 @@ function mcwp_inline_color_style() {
 	if ( ! wp_style_is( 'wpmc_slider', 'enqueued' ) ) {
 		return;
 	}
-	$option_func = ( use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
+	$option_func = ( mcwp_use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 	$mcwp_color  = $option_func( 'mcwp_color' );
 	$css         = '.mcalc-color,.mcalc .slider-handle.round,.mcalc .slider.slider-horizontal .slider-selection{background:' . esc_attr( $mcwp_color ) . ' !important;}';
 	wp_add_inline_style( 'wpmc_slider', $css );

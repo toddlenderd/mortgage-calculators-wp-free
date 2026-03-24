@@ -1,5 +1,5 @@
-var $mcwp = jQuery.noConflict();
-$mcwp(function($) {
+(function($) {
+"use strict";
 
     $(document).on('click', '.mcwp-submit', function(e) {
         e.preventDefault();
@@ -738,4 +738,4 @@ $mcwp(function($) {
         $(".rc_lifetime_div_span", este).val($("#rc_lifetime_div_span", este).text());
     }
     /* Refinance Calculator Short Code Ended Here*/
-});
+})(jQuery);

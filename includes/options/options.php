@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /**
  * Option page template.
  *
@@ -19,7 +20,7 @@ function wpmc_admin_init() {
 		add_settings_field( 'wpmc_mail_use_network_settings', __( 'Use Network Settings', 'mortgage-calculators-wp' ), 'mcwp_checkbox', 'wpmc-settings-mail', 'wpmc_mail', array( 'wpmc_mail_use_network_settings', 'wpmc_mail' ) );
 		register_setting( 'wpmc_mail', 'wpmc_mail_use_network_settings' );
 	}
-	$text     = 'display_text_element';
+	$text     = 'mcwp_display_text_element';
 	$textarea = 'mcwp_textarea';
 
 	$allfields = array(
@@ -33,7 +34,7 @@ function wpmc_admin_init() {
 		),
 		array(
 			'mcwp_color',
-			'type'         => 'color_input',
+			'type'         => 'mcwp_color_input',
 			'section_name' => 'wpmc-settings-mail',
 			'label'        => __( 'Calculator Color', 'mortgage-calculators-wp' ),
 			'group'        => 'wpmc_mail',
@@ -79,7 +80,7 @@ function wpmc_admin_init() {
 		$f_title  = $val['label'];
 		$f_page   = $val['section_name'];
 		$f_group  = $val['group'];
-		if ( 'color_input' === $callback ) {
+		if ( 'mcwp_color_input' === $callback ) {
 			$val['sanitize_callback'] = 'sanitize_hex_color';
 		}
 		add_settings_field( $fid, $f_title, $callback, $f_page, $f_group, $val );
@@ -255,7 +256,7 @@ function wpmc_admin_init() {
 
 		array(
 			'wpmc_two_msg_bdy',
-			'type'         => 'msg_body',
+			'type'         => 'mcwp_msg_body',
 			'section_name' => 'wpmc-settings-two',
 			'label'        => '
               ' . __( 'Message Body', 'mortgage-calculators-wp' ) . ' <br /><br />
@@ -426,7 +427,7 @@ function wpmc_admin_init() {
 		),
 		array(
 			'wpmc_three_msg_bdy',
-			'type'         => 'msg_body',
+			'type'         => 'mcwp_msg_body',
 			'section_name' => 'wpmc-settings-three',
 			'label'        => '
               ' . __( 'Message Body', 'mortgage-calculators-wp' ) . ' <br /><br />
@@ -614,7 +615,7 @@ function wpmc_admin_init() {
 
 		array(
 			'wpmc_five_msg_bdy',
-			'type'         => 'msg_body',
+			'type'         => 'mcwp_msg_body',
 			'section_name' => 'wpmc-settings-five',
 			'label'        => '
               ' . __( 'Message Body', 'mortgage-calculators-wp' ) . ' <br /><br />
@@ -768,7 +769,7 @@ function wpmc_admin_init() {
 		),
 		array(
 			'wpmc_six_msg_bdy',
-			'type'         => 'msg_body',
+			'type'         => 'mcwp_msg_body',
 			'section_name' => 'wpmc-settings-six',
 			'label'        => '
                           ' . __( 'Message Body', 'mortgage-calculators-wp' ) . ' <br /><br />
@@ -951,7 +952,7 @@ function wpmc_mail_display_shortcode() {
  *
  * @param string $text Text.
  */
-function copyShortText( $text ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
+function mcwp_copy_short_text( $text ) { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
 	echo( '<p style="background: #fff; border-left: 4px solid #008ec2; padding: 5px 10px;">
             ' . wp_kses_post( __( 'Copy this <strong>shortcode</strong> and paste it into your <strong>post, page, or text widget</strong> content: ', 'mortgage-calculators-wp' ) ) . '
             <strong>[mcwp type="' . esc_html( $text ) . '"]</strong></p>
@@ -962,35 +963,35 @@ function copyShortText( $text ) { // phpcs:ignore WordPress.NamingConventions.Va
  * Calculator One Options.
  */
 function wpmc_one_display_shortcode() {
-	copyShortText( 'cv' );
+	mcwp_copy_short_text( 'cv' );
 }
 
 /**
  * Calculator Two Options.
  */
 function wpmc_two_display_shortcode() {
-	copyShortText( 'fha' );
+	mcwp_copy_short_text( 'fha' );
 }
 
 /**
  * Calculator Three Options.
  */
 function wpmc_three_display_shortcode() {
-	copyShortText( 'va' );
+	mcwp_copy_short_text( 'va' );
 }
 
 /**
  * Calculator Five Options.
  */
 function wpmc_five_display_shortcode() {
-	copyShortText( 'mha' );
+	mcwp_copy_short_text( 'mha' );
 }
 
 /**
  * Calculator Six Options.
  */
 function wpmc_six_display_shortcode() {
-	copyShortText( 'rc' );
+	mcwp_copy_short_text( 'rc' );
 }
 
 /**
@@ -999,7 +1000,7 @@ function wpmc_six_display_shortcode() {
  * @param array $args Function args.
  */
 function mcwp_checkbox( $args ) {
-	$options  = get_wpmc_option( $args[0] );
+	$options  = mcwp_get_option( $args[0] );
 	$val      = ( 0 === (int) $options ) ? '0' : '1';
 	$main_val = ( 0 === (int) $val ) ? '0' : '1';
 	$checked  = ( 0 === (int) $val ) ? 'checked' : ''; ?>
@@ -1013,8 +1014,8 @@ function mcwp_checkbox( $args ) {
  *
  * @param array $args Function args.
  */
-function color_input( $args ) {
-	$options = get_wpmc_option( $args[0] );
+function mcwp_color_input( $args ) {
+	$options = mcwp_get_option( $args[0] );
 	?>
 	<input type="text" name="<?php echo esc_attr( $args[0] ); ?>" class="<?php echo esc_attr( $args['group'] ); ?> color-picker" placeholder="<?php echo esc_attr( $args['placeholder'] ); ?>" value="<?php echo ! empty( $options ) ? esc_attr( $options ) : esc_attr( '#bada55' ); ?>" id="<?php echo esc_attr( $args[0] ); ?>" size="64" />
 	<?php
@@ -1025,8 +1026,8 @@ function color_input( $args ) {
  *
  * @param array $args Function args.
  */
-function display_text_element( $args ) {
-	$options = get_wpmc_option( $args[0] );
+function mcwp_display_text_element( $args ) {
+	$options = mcwp_get_option( $args[0] );
 	?>
 	<input type="text" name="<?php echo esc_attr( $args[0] ); ?>" id="<?php echo esc_attr( $args[0] ); ?>" class="<?php echo esc_attr( $args['group'] ); ?>" placeholder="<?php echo empty( $args['placeholder'] ) ? esc_attr( $args['label'] ) : esc_attr( $args['placeholder'] ); ?>" value="<?php echo isset( $options ) ? esc_attr( $options ) : ''; ?>" size="64" />
 	<?php
@@ -1038,7 +1039,7 @@ function display_text_element( $args ) {
  * @param array $args Function args.
  */
 function mcwp_dropdown( $args ) {
-	$options = get_wpmc_option( $args[0] );
+	$options = mcwp_get_option( $args[0] );
 	?>
 		<select name="<?php echo esc_attr( $args[0] ); ?>" class="<?php echo esc_attr( $args['group'] ); ?>">
 			<option value="no" <?php echo 'no' === $options ? 'selected' : ''; ?>><?php esc_html_e( 'No', 'mortgage-calculators-wp' ); ?></option>
@@ -1054,7 +1055,7 @@ function mcwp_dropdown( $args ) {
  * @param array $args Function args.
  */
 function mcwp_textarea( $args ) {
-	$options = get_wpmc_option( $args[0] );
+	$options = mcwp_get_option( $args[0] );
 	?>
 		<textarea name="<?php echo esc_attr( $args[0] ); ?>" class="<?php echo esc_attr( $args['group'] ); ?>" placeholder="<?php echo esc_attr( $args['placeholder'] ); ?>" rows="5" cols="65" size="64" ><?php echo isset( $options ) ? esc_attr( $options ) : ''; ?></textarea>
 	<?php
@@ -1066,7 +1067,7 @@ function mcwp_textarea( $args ) {
  * @param array $args Function args.
  */
 function mcwp_currency( $args ) {
-	$options = get_wpmc_option( $args[0] );
+	$options = mcwp_get_option( $args[0] );
 
 	$currencies = array(
 		'$'  => __( 'United States Dollar', 'mortgage-calculators-wp' ),
@@ -1078,11 +1079,7 @@ function mcwp_currency( $args ) {
 		<select name="<?php echo esc_attr( $args[0] ); ?>" class="<?php echo esc_attr( $args['group'] ); ?>">
 			<?php
 			foreach ( $currencies as $key => $val ) {
-				$selected = '';
-				if ( $key === $options ) {
-					$selected = ' selected="selected"';
-				}
-				echo '<option value="' . esc_attr( $key ) . '" ' . esc_attr( $selected ) . '>' . esc_html( $val ) . '</option>';
+				echo '<option value="' . esc_attr( $key ) . '" ' . selected( $options, $key, false ) . '>' . esc_html( $val ) . '</option>';
 			}
 			?>
 		</select>
@@ -1094,8 +1091,8 @@ function mcwp_currency( $args ) {
  *
  * @param array $args Function args.
  */
-function msg_body( $args ) {
-	$options = get_wpmc_option( $args[0] );
+function mcwp_msg_body( $args ) {
+	$options = mcwp_get_option( $args[0] );
 	switch ( $args['group'] ) {
 		case 'wpmc_one': // Conventional.
 			$msg_body = __( 'Based on a purchase price of', 'mortgage-calculators-wp' ) . ' <strong>$[purchase-price]</strong>, ' . __( 'and a down payment of', 'mortgage-calculators-wp' ) . ' <strong>$[down-payment]</strong>, ' . __( 'your new', 'mortgage-calculators-wp' ) . ' <strong>[mortgage-term] ' . __( 'year', 'mortgage-calculators-wp' ) . '</strong> ' . __( 'loan with an interest rate of', 'mortgage-calculators-wp' ) . ' <strong>[interest-rate]%</strong> ' . __( 'will have a payment of', 'mortgage-calculators-wp' ) . ' <strong>$[calculation-result]</strong>. ' . __( 'This includes monthly taxes of', 'mortgage-calculators-wp' ) . ' <strong>$[monthly-taxes]</strong>, ' . __( 'monthly insurance of', 'mortgage-calculators-wp' ) . ' <strong>$[monthly-insurance]</strong>, ' . __( 'and monthly hoa of', 'mortgage-calculators-wp' ) . ' <strong>$[monthly-hoa]</strong>.';

@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /**
  * Main admin template.
  *
@@ -81,7 +82,7 @@ function wpmc_main_template() {
 			<a href="<?php echo esc_url( add_query_arg( array( 'action' => 'cal-five' ), admin_url( $admin_url ) ) ); ?>" class="nav-tab
 				<?php
 				if ( $cal_five_screen ) {
-					echo ' nav-tab-active';
+					echo esc_attr( ' nav-tab-active' );
 				}
 				?>
 			"><?php esc_html_e( 'Affordability', 'mortgage-calculators-wp' ); ?></a>
@@ -97,7 +98,7 @@ function wpmc_main_template() {
 		<div class="wrap">
 			<p id="settings_errors"><?php settings_errors(); ?></p>
 
-			<form method="post" action="<?php echo( is_network_admin() ? 'edit.php?action=wpmc_update_network_options' : 'options.php' ); ?>">
+			<form method="post" action="<?php echo esc_url( is_network_admin() ? 'edit.php?action=wpmc_update_network_options' : 'options.php' ); ?>">
 				<?php
 				$upgrade_text     = __( 'To upgrade or get plugin support please visit', 'mortgage-calculators-wp' );
 				$mortage_url      = 'https://mortgagecalculatorsplugin.com';
@@ -125,18 +126,17 @@ function wpmc_main_template() {
 				?>
 			</form>
 			<script>
-				var $mcwp = jQuery.noConflict();
-				$mcwp(function($){
-					var is_multisite = '<?php echo is_multisite() ? true : false; ?>';
-					var is_network_admin = '<?php echo is_network_admin() ? true : false; ?>';
+				(function($){
+					var is_multisite = '<?php echo esc_js( is_multisite() ? '1' : '' ); ?>';
+					var is_network_admin = '<?php echo esc_js( is_network_admin() ? '1' : '' ); ?>';
 					<?php if ( empty( $_GET['action'] ) ) { ?>
 						<?php
-							$options = get_wpmc_option( 'wpmc_mail_use_network_settings' );
+							$options = mcwp_get_option( 'wpmc_mail_use_network_settings' );
 							$val     = ( 0 === (int) $options ) ? '0' : '1';
 						?>
 					var wpmc_mail_use_network_settings = '<?php echo esc_attr( $val ); ?>';
 						<?php
-						$wpmc_mail_use_network_settings = get_wpmc_option( 'wpmc_mail_use_network_settings' );
+						$wpmc_mail_use_network_settings = mcwp_get_option( 'wpmc_mail_use_network_settings' );
 						if ( false !== $wpmc_mail_use_network_settings ) {
 							?>
 						if (is_multisite && !is_network_admin && wpmc_mail_use_network_settings == '0') {
@@ -168,12 +168,12 @@ function wpmc_main_template() {
 					jQuery('.value_one_heading').prepend('<h2 class="wpmc_one_label" style="padding-top:30px">Customize Values</h2>');
 					jQuery('input[name="wpmc_one_pp_initial"]').parents('tr').unwrap();
 					<?php
-					$options = get_wpmc_option( 'wpmc_one_use_network_settings' );
+					$options = mcwp_get_option( 'wpmc_one_use_network_settings' );
 					$val     = ( 0 === (int) $options ) ? '0' : '1';
 					?>
 					var wpmc_one_use_network_settings = '<?php echo esc_attr( $val ); ?>';
 					<?php
-					$wpmc_one_use_network_settings = get_wpmc_option( 'wpmc_one_use_network_settings' );
+					$wpmc_one_use_network_settings = mcwp_get_option( 'wpmc_one_use_network_settings' );
 					if ( false !== $wpmc_one_use_network_settings ) {
 						?>
 					if (is_multisite && !is_network_admin && wpmc_one_use_network_settings == '0') {
@@ -207,13 +207,13 @@ function wpmc_main_template() {
 					jQuery('.value_two_heading').prepend('<h2 class="wpmc_two_label" style="padding-top:30px">Customize Values</h2>');
 					jQuery('input[name="wpmc_two_pp_initial"]').parents('tr').unwrap();
 					<?php
-					$options = get_wpmc_option( 'wpmc_two_use_network_settings' );
+					$options = mcwp_get_option( 'wpmc_two_use_network_settings' );
 					$val     = ( 0 === (int) $options ) ? '0' : '1';
 					?>
 					var wpmc_two_use_network_settings = '<?php echo esc_attr( $val ); ?>';
 
 					<?php
-						$wpmc_two_use_network_settings = get_wpmc_option( 'wpmc_two_use_network_settings' );
+						$wpmc_two_use_network_settings = mcwp_get_option( 'wpmc_two_use_network_settings' );
 					if ( false !== $wpmc_two_use_network_settings ) {
 						?>
 
@@ -248,12 +248,12 @@ function wpmc_main_template() {
 					jQuery('.value_three_heading').prepend('<h2 class="wpmc_three_label" style="padding-top: 30px;">Customize Values</h2>');
 					jQuery('input[name="wpmc_three_pp_initial"]').parents('tr').unwrap();
 					<?php
-					$options = get_wpmc_option( 'wpmc_three_use_network_settings' );
+					$options = mcwp_get_option( 'wpmc_three_use_network_settings' );
 					$val     = ( 0 === (int) $options ) ? '0' : '1';
 					?>
 					var wpmc_three_use_network_settings = '<?php echo esc_attr( $val ); ?>';
 					<?php
-						$wpmc_three_use_network_settings = get_wpmc_option( 'wpmc_three_use_network_settings' );
+						$wpmc_three_use_network_settings = mcwp_get_option( 'wpmc_three_use_network_settings' );
 					if ( false !== $wpmc_three_use_network_settings ) {
 						?>
 					if (is_multisite && !is_network_admin && wpmc_three_use_network_settings == '0') {
@@ -289,12 +289,12 @@ function wpmc_main_template() {
 					jQuery('.value_five_heading').prepend('<h2 class="wpmc_five_label" style="padding-top: 30px;">Customize Values</h2>');
 					jQuery('input[name="wpmc_five_mhaai_initial"]').parents('tr').unwrap();
 					<?php
-					$options = get_wpmc_option( 'wpmc_five_use_network_settings' );
+					$options = mcwp_get_option( 'wpmc_five_use_network_settings' );
 					$val     = ( 0 === (int) $options ) ? '0' : '1';
 					?>
 					var wpmc_five_use_network_settings = '<?php echo esc_attr( $val ); ?>';
 					<?php
-						$wpmc_five_use_network_settings = get_wpmc_option( 'wpmc_five_use_network_settings' );
+						$wpmc_five_use_network_settings = mcwp_get_option( 'wpmc_five_use_network_settings' );
 					if ( false !== $wpmc_five_use_network_settings ) {
 						?>
 					if (is_multisite && !is_network_admin && wpmc_five_use_network_settings == '0') {
@@ -329,12 +329,12 @@ function wpmc_main_template() {
 					jQuery('.value_six_heading').prepend('<h2 class="wpmc_six_label" style="padding-top: 30px;">Customize Values</h2>');
 					jQuery('input[name="wpmc_six_la_initial"]').parents('tr').unwrap();
 					<?php
-					$options = get_wpmc_option( 'wpmc_six_use_network_settings' );
+					$options = mcwp_get_option( 'wpmc_six_use_network_settings' );
 					$val     = ( 0 === (int) $options ) ? '0' : '1';
 					?>
 					var wpmc_six_use_network_settings = '<?php echo esc_attr( $val ); ?>';
 					<?php
-						$wpmc_six_use_network_settings = get_wpmc_option( 'wpmc_six_use_network_settings' );
+						$wpmc_six_use_network_settings = mcwp_get_option( 'wpmc_six_use_network_settings' );
 					if ( false !== $wpmc_six_use_network_settings ) {
 						?>
 					if (is_multisite && !is_network_admin && wpmc_six_use_network_settings == '0') {
@@ -359,7 +359,7 @@ function wpmc_main_template() {
 						jQuery('.wpmc_six_label').toggle();
 					});
 				<?php } ?>
-		});
+		})(jQuery);
 
 			</script>
 		</div>

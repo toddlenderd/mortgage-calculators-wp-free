@@ -1,4 +1,5 @@
-<?php // phpcs:ignore WordPress.Files.FileName.NotHyphenatedLowercase
+<?php
+defined( 'ABSPATH' ) || exit; // phpcs:ignore WordPress.Files.FileName.NotHyphenatedLowercase
 /**
  * Update network options.
  *

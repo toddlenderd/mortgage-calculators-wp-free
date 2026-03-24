@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /**
  * Global functions.
  *
@@ -14,16 +15,13 @@ function mcwp_sendmail() {
 		wp_die( esc_html__( 'Security check failed.', 'mortgage-calculators-wp' ), '', array( 'response' => 403 ) );
 	}
 
-	global $shortcode_tags;
-	$to          = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
-	$uns         = get_option( 'wpmc_mail_use_network_settings' );
-	$option_func = ( ( false === $uns ) ? 'get_site_option' : ( ( 1 === $uns ) ? 'get_site_option' : 'get_option' ) );
+	$to            = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+	$option_func   = ( mcwp_use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 	if ( mcwp_use_network_setting_email() === 'yes' ) {
 		$wpmc_mail_message = do_shortcode( get_site_option( 'wpmc_mail_message' ) );
 	} else {
 		$wpmc_mail_message = do_shortcode( get_option( 'wpmc_mail_message' ) );
 	}
-	$option_func   = ( use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 	$mcwp_currency = $option_func( 'mcwp_currency' );
 	$curr_symbol   = $mcwp_currency;
 	$body          = '';
@@ -33,14 +31,6 @@ function mcwp_sendmail() {
 	$request_type  = isset( $_REQUEST['type'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['type'] ) ) : '';
 	if ( 'cv' === $request_type ) {
 		require 'emails/cv.php';
-	} elseif ( 'fha' === $request_type ) {
-		require 'emails/fha.php';
-	} elseif ( 'va' === $request_type ) {
-		require 'emails/va.php';
-	} elseif ( 'mha' === $request_type ) {
-		require 'emails/mha.php';
-	} elseif ( 'rc' === $request_type ) {
-		require 'emails/rc.php';
 	}
 	wp_mail( $to, $subject, $body, mcwp_email_headers() );
 	if ( mcwp_use_network_setting_email() === 'yes' ) {
@@ -134,7 +124,7 @@ function wpmc_one_use_network_settings() {
  * @param string $val Option name.
  * @return string 'yes' or 'no'.
  */
-function use_network_settings( $val ) {
+function mcwp_use_network_settings( $val ) {
 	$uns = get_option( $val );
 	return 0 === (int) $uns ? 'yes' : 'no';
 }
@@ -147,7 +137,7 @@ function use_network_settings( $val ) {
  * @param string $re Dynamic text.
  * @return mixed Option value or default.
  */
-function calc_fields( $network, $field, $re ) {
+function mcwp_calc_fields( $network, $field, $re ) {
 	$set = 1; // Default to local settings.
 	if ( 'cv' === $network ) {
 		$set = get_option( 'wpmc_one_use_network_settings' );
@@ -205,7 +195,7 @@ function mcwp_email_headers() {
  * @param string $option_name Option name.
  * @return mixed Option value.
  */
-function get_wpmc_option( $option_name ) {
+function mcwp_get_option( $option_name ) {
 	if ( is_network_admin() ) {
 		return get_site_option( $option_name );
 	} else {
@@ -220,7 +210,7 @@ function get_wpmc_option( $option_name ) {
  * @param string $option_value Option value.
  * @return bool Whether the option was updated.
  */
-function update_wpmc_option( $option_name, $option_value ) {
+function mcwp_update_option( $option_name, $option_value ) {
 	$option_value = sanitize_text_field( $option_value );
 	if ( is_network_admin() ) {
 		return update_site_option( $option_name, $option_value );
@@ -235,7 +225,7 @@ function update_wpmc_option( $option_name, $option_value ) {
  * @param string $option_name Option name.
  * @return bool Whether the option was deleted.
  */
-function delete_wpmc_option( $option_name ) {
+function mcwp_delete_option( $option_name ) {
 	if ( is_network_admin() ) {
 		return delete_site_option( $option_name );
 	} else {
@@ -249,7 +239,7 @@ function delete_wpmc_option( $option_name ) {
  * @return string Sanitized CSS color value.
  */
 function mcwp_get_color() {
-	$option_func = ( use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
+	$option_func = ( mcwp_use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 	$color       = $option_func( 'mcwp_color' );
 
 	if ( empty( $color ) ) {

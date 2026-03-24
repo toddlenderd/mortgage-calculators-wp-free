@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /**
  * Register shortcode.
  *
@@ -10,7 +11,7 @@
  *
  * @param array       $atts Shortcode atts.
  * @param string|null $content Content.
- * @param strin       $tag Tags.
+ * @param string      $tag Tags.
  */
 function mcwp_shortcode( $atts = array(), $content = null, $tag = '' ) {
 	wp_enqueue_script( 'wpmc_calculator' );
@@ -27,7 +28,7 @@ function mcwp_shortcode( $atts = array(), $content = null, $tag = '' ) {
 
 	// phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 	$calTemplate2  = '';
-	$option_func   = ( use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
+	$option_func   = ( mcwp_use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 	$mcwp_currency = $option_func( 'mcwp_currency' );
 	$curr_symbol   = $mcwp_currency;
 

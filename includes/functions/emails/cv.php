@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /**
  * CV template.
  *
@@ -17,10 +18,7 @@ $monthly_taxes              = isset( $_POST['monthly_taxes'] ) ? sanitize_text_f
 $monthly_insurance          = isset( $_POST['monthly_insurance'] ) ? round( sanitize_text_field( wp_unslash( $_POST['monthly_insurance'] ) ), 2 ) : '';
 $monthly_mortgage_insurance = isset( $_POST['monthly_mortgage_insurance'] ) ? sanitize_text_field( wp_unslash( $_POST['monthly_mortgage_insurance'] ) ) : '';
 $monthly_hoa                = isset( $_POST['monthly_hoa'] ) ? sanitize_text_field( wp_unslash( $_POST['monthly_hoa'] ) ) : '';
-$option_func                = ( use_network_settings( 'wpmc_one_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
-$wpmc_admin                 = $option_func( 'wpmc_one_email' );
-$site_admin                 = mcwp_checksettings( 'admin_email' );
-
+$option_func                = ( mcwp_use_network_settings( 'wpmc_one_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 $subject = __( 'Your Conventional Mortgage Calculation', 'mortgage-calculators-wp' );
 
 // Build the breakdown rows for the email template.
