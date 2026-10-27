@@ -3,7 +3,7 @@
  * Plugin Name:  Mortgage Calculators WP
  * Plugin URI:   https://mortgagecalculatorsplugin.com
  * Description:  A contemporary set of mortgage calculators from Lenderd.com
- * Version:      1.63
+ * Version:      1.64
  * Author:       Lenderd
  * Author URI:   https://lenderd.com
  * License:      GPL2
@@ -17,7 +17,7 @@
 // Blocking direct access to your plugin PHP files.
 // phpcs:ignore Squiz.Operators.ValidLogicalOperators.NotAllowed
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
-define( 'MCWP_VERSION', '1.63' );
+define( 'MCWP_VERSION', '1.64' );
 define( 'MC_PATH', plugin_dir_path( __FILE__ ) );
 define( 'MC_URL', plugin_dir_url( __FILE__ ) );
 // Load common functions.
@@ -69,7 +69,8 @@ function mcwp_enqueue() {
 	$option_func = ( mcwp_use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 	$mcwp_color  = $option_func( 'mcwp_color' );
 	if ( ! empty( $mcwp_color ) ) {
-		$css = '.mcalc-color,.mcalc .slider-handle.round,.mcalc .slider.slider-horizontal .slider-selection{background:' . esc_attr( $mcwp_color ) . ' !important;}';
+		// mcwp_get_color() only returns a valid CSS color, so nothing else reaches the stylesheet.
+		$css = '.mcalc-color,.mcalc .slider-handle.round,.mcalc .slider.slider-horizontal .slider-selection{background:' . mcwp_get_color() . ' !important;}';
 		wp_add_inline_style( 'wpmc_slider', $css );
 	}
 
@@ -77,9 +78,12 @@ function mcwp_enqueue() {
 		'wpmc_calculator',
 		'mcwp_ajax',
 		array(
-			'ajaxurl'  => admin_url( 'admin-ajax.php' ),
-			'nonce'    => wp_create_nonce( 'mcwp_sendmail_nonce' ),
-			'calc_res' => __( 'Your calculations are on the way to your inbox!', 'mortgage-calculators-wp' ),
+			'ajaxurl'       => admin_url( 'admin-ajax.php' ),
+			'nonce'         => wp_create_nonce( 'mcwp_sendmail_nonce' ),
+			'calc_res'      => __( 'Your calculations are on the way to your inbox!', 'mortgage-calculators-wp' ),
+			'invalid_email' => __( 'Please enter a valid email address.', 'mortgage-calculators-wp' ),
+			'limit_error'   => __( 'Too many requests. Please try again later.', 'mortgage-calculators-wp' ),
+			'send_error'    => __( 'Sorry, we could not send your results. Please try again.', 'mortgage-calculators-wp' ),
 		)
 	);
 }

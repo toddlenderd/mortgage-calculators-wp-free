@@ -30,7 +30,7 @@ function mcwp_shortcode( $atts = array(), $content = null, $tag = '' ) {
 	$calTemplate2  = '';
 	$option_func   = ( mcwp_use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 	$mcwp_currency = $option_func( 'mcwp_currency' );
-	$curr_symbol   = $mcwp_currency;
+	$curr_symbol   = esc_html( $mcwp_currency ); // Only ever printed into the calculator's HTML.
 
 	$wrap_class = '';
 	if ( 'cv' === $type ) {

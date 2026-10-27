@@ -10,12 +10,27 @@ defined( 'ABSPATH' ) || exit;
  * Sendmail via AJAX.
  */
 function mcwp_sendmail() {
-	// Verify nonce for CSRF protection.
+	// Verify nonce for CSRF protection. A page served from a full-page cache can carry an
+	// expired nonce; the script then asks mcwp_fresh_nonce() for a new one and retries.
 	if ( ! isset( $_POST['mcwp_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['mcwp_nonce'] ) ), 'mcwp_sendmail_nonce' ) ) {
-		wp_die( esc_html__( 'Security check failed.', 'mortgage-calculators-wp' ), '', array( 'response' => 403 ) );
+		wp_send_json_error( array( 'code' => 'nonce' ), 403 );
 	}
 
-	$to            = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+	// Only the Conventional calculator sends email in this version.
+	$request_type = isset( $_POST['type'] ) ? sanitize_key( wp_unslash( $_POST['type'] ) ) : '';
+	if ( 'cv' !== $request_type ) {
+		wp_send_json_error( array( 'code' => 'type' ), 400 );
+	}
+
+	$to = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+	if ( ! is_email( $to ) ) {
+		wp_send_json_error( array( 'code' => 'email' ), 400 );
+	}
+
+	if ( ! mcwp_sendmail_allowed( $to ) ) {
+		wp_send_json_error( array( 'code' => 'limit' ), 429 );
+	}
+
 	$option_func   = ( mcwp_use_network_settings( 'wpmc_mail_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 	if ( mcwp_use_network_setting_email() === 'yes' ) {
 		$wpmc_mail_message = do_shortcode( get_site_option( 'wpmc_mail_message' ) );
@@ -28,24 +43,107 @@ function mcwp_sendmail() {
 	$subject       = '';
 	$cc_subject    = '';
 	$cc_body       = '';
-	$request_type  = isset( $_REQUEST['type'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['type'] ) ) : '';
-	if ( 'cv' === $request_type ) {
-		require 'emails/cv.php';
-	}
-	wp_mail( $to, $subject, $body, mcwp_email_headers() );
+	require __DIR__ . '/emails/cv.php';
+	$sent = wp_mail( $to, $subject, $body, mcwp_email_headers() );
 	if ( mcwp_use_network_setting_email() === 'yes' ) {
 		$to_form = get_site_option( 'wpmc_one_email' );
 	} else {
 		$to_form = get_option( 'wpmc_one_email' );
 	}
-	if ( preg_match( '/[\[\]\'^£$%&*()@#~?><>,|=_+¬-]/', $to_form ) ) {
+	if ( preg_match( '/[\[\]\'^£$%&*()@#~?><>,|=_+¬-]/', (string) $to_form ) ) {
 		$to_form = do_shortcode( $to_form );
 	}
-	wp_mail( $to_form, $cc_subject, $cc_body, mcwp_email_headers() );
-	wp_die();
+	// No lead notification when no address is set, rather than an email to nobody.
+	if ( ! empty( $to_form ) ) {
+		wp_mail( $to_form, $cc_subject, $cc_body, mcwp_email_headers() );
+	}
+	if ( $sent ) {
+		wp_send_json_success();
+	}
+	wp_send_json_error( array( 'code' => 'mail' ), 500 );
 }
 add_action( 'wp_ajax_mcwp_sendmail', 'mcwp_sendmail' );
 add_action( 'wp_ajax_nopriv_mcwp_sendmail', 'mcwp_sendmail' );
+
+/**
+ * A fresh nonce for the send form, for pages served from a full-page cache whose printed
+ * nonce has expired. admin-ajax.php is never cached, so this one is always current.
+ */
+function mcwp_fresh_nonce() {
+	wp_send_json_success( array( 'nonce' => wp_create_nonce( 'mcwp_sendmail_nonce' ) ) );
+}
+add_action( 'wp_ajax_mcwp_nonce', 'mcwp_fresh_nonce' );
+add_action( 'wp_ajax_nopriv_mcwp_nonce', 'mcwp_fresh_nonce' );
+
+/**
+ * Rate limit for the send form, so it can't be used to mail people in bulk: by default at
+ * most 10 sends an hour from one IP address and 3 an hour to one email address. Change the
+ * numbers (0 turns a limit off) with the mcwp_sendmail_rate_limits filter.
+ *
+ * @param string $to Recipient email address.
+ * @return bool Whether this send is allowed; counts it when it is.
+ */
+function mcwp_sendmail_allowed( $to ) {
+	$limits = wp_parse_args(
+		apply_filters( 'mcwp_sendmail_rate_limits', array() ),
+		array(
+			'per_ip'    => 10,
+			'per_email' => 3,
+			'window'    => HOUR_IN_SECONDS,
+		)
+	);
+	$ip     = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$counts = array(
+		'mcwp_rl_ip_' . md5( $ip )               => (int) $limits['per_ip'],
+		'mcwp_rl_to_' . md5( strtolower( $to ) ) => (int) $limits['per_email'],
+	);
+	foreach ( $counts as $key => $max ) {
+		if ( $max > 0 && (int) get_transient( $key ) >= $max ) {
+			return false;
+		}
+	}
+	foreach ( $counts as $key => $max ) {
+		set_transient( $key, (int) get_transient( $key ) + 1, (int) $limits['window'] );
+	}
+	return true;
+}
+
+/**
+ * A posted amount, ready to show in an email. The calculator posts amounts formatted with
+ * thousands separators ("1,250.50"), so separators and symbols are dropped before the number
+ * is read; anything that still isn't a number comes back empty.
+ *
+ * @param string $key  POST field.
+ * @param bool   $rate True for a rate (up to 3 decimals, as many as it has: 6.125, 6.5).
+ * @return string The amount, formatted for the site's locale, or ''.
+ */
+function mcwp_posted_amount( $key, $rate = false ) {
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in mcwp_sendmail().
+	$raw = isset( $_POST[ $key ] ) ? preg_replace( '/[^0-9.\-]/', '', sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) ) : '';
+	if ( '' === $raw || ! is_numeric( $raw ) ) {
+		return '';
+	}
+	$amount = round( (float) $raw, $rate ? 3 : 2 );
+	if ( $rate ) {
+		$places = 0;
+		while ( $places < 3 && round( $amount, $places ) !== $amount ) {
+			++$places;
+		}
+	} else {
+		$places = floor( $amount ) === $amount ? 0 : 2;
+	}
+	return number_format_i18n( $amount, $places );
+}
+
+/**
+ * Whether a value is a CSS color the calculator accepts: hex, a color name, or rgb()/hsl().
+ *
+ * @param string $color Color.
+ * @return bool
+ */
+function mcwp_is_color( $color ) {
+	return (bool) preg_match( '/^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+|(rgba?|hsla?)\(\s*[\d\s,.\/%]+\))$/', $color );
+}
 
 /**
  * Email dynamic body.
@@ -252,17 +350,7 @@ function mcwp_get_color() {
 
 	$color = trim( $color );
 
-	if ( preg_match( '/^#[0-9a-fA-F]{3,8}$/', $color ) ) {
-		return $color;
-	}
-	if ( preg_match( '/^[a-zA-Z]+$/', $color ) ) {
-		return $color;
-	}
-	if ( preg_match( '/^(rgba?|hsla?)\(\s*[\d\s,.\/%]+\)$/', $color ) ) {
-		return $color;
-	}
-
-	return '#1a56db';
+	return mcwp_is_color( $color ) ? $color : '#1a56db';
 }
 
 /**

@@ -1,0 +1,3 @@
+# Not shipped in the plugin: WordPress.org directory art (goes to SVN /assets) and repo files.
+.wordpress-org export-ignore
+.gitattributes export-ignore

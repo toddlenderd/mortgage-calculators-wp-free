@@ -4,7 +4,7 @@
 
 /*Values*/
 .mcalc .mcalc-main {width: 60%; float: left; padding: 50px;background:#fff;box-sizing:border-box}
-.mcalc .mcalc-values {width: 40%; float: left; padding: 50px;box-sizing:border-box}
+.mcalc .mcalc-values {width: 40%; float: left; padding: 50px;box-sizing:border-box; container-type: inline-size}
 .mcalc .mcalc-half {width: 50%; float:left; position: relative; padding: 0 20px; box-sizing: border-box;}
 .mcalc .mcalc-full {width: 100%; float:left;padding: 0 20px;box-sizing:border-box}
 .mcalc label {display: block;line-height: 40px;padding:0!important;margin:0; letter-spacing: 0; font-size: .9em}
@@ -23,7 +23,7 @@
 .mcalc .slider .tooltip.top {display:none!important}
 
 /*Results*/
-.mcalc .mcalc-results h2 {color:#fff; font-size: 4em; font-weight: 500; margin: 0 0 10px; border:0; box-shadow: 0 0;padding:0}
+.mcalc .mcalc-results h2 {color:#fff; font-size: 4em; font-size: min(4em, 18cqi); font-weight: 500; margin: 0 0 10px; border:0; box-shadow: 0 0;padding:0}
 .mcalc .mcalc-results h2 em {font-size: .6em; margin: 5px; color: rgba(255,255,255,.5);}
 .mcalc .mcalc-results h3 {color:rgba(255,255,255,.5); font-size: 1.2em; font-weight: 300; text-transform: uppercase; margin: 0 0 40px; padding:0; letter-spacing: 4px; border:0; box-shadow: 0 0}
 .mcalc .mcalc-results h4 {color:rgba(255,255,255,.8); font-size: 1.1em; font-weight: 300; text-transform: none; margin: 0 0 10px; padding:0; letter-spacing: 1px; border:0; box-shadow: 0 0;background:transparent}
@@ -44,7 +44,7 @@
 	.mcalc {font-size: .9em;}
 	.mcalc .mcalc-half,.mcalc .mcalc-full {padding:0 10px}
 	.mcalc .mcalc-main,.mcalc .mcalc-values {padding:50px 25px}
-	.mcalc .mcalc-results h2 {font-size: 3em}
+	.mcalc .mcalc-results h2 {font-size: 3em; font-size: min(3em, 18cqi)}
 	.mcalc .mcalc-results h3 {font-size: 1em}
     .mcalc i {left: -30px}
 }

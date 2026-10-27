@@ -1,10 +1,9 @@
 === Mortgage Calculators WP ===
-Contributors: (8blocks)
-Donate link: http://wordpress.org
+Contributors: 8blocks
 Tags: mortgage, mortgage calculator, loan calculator, real estate, mortgage calc
-Requires at least: 4.6
-Stable tag: 1.63
-Tested up to: 6.9.4
+Requires at least: 5.5
+Stable tag: 1.64
+Tested up to: 7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,9 +46,9 @@ Yes you can. We have provided a color picker that will change the look/feel of y
 
 == Screenshots ==
 
-1. Admin Settings View
-
-2. Sample Frontend View of the Calculator
+1. The Conventional calculator on your site, in your brand color.
+2. The results email a visitor gets when they ask for a copy. You get a lead notification at the same time.
+3. Settings: your lead email address, field labels, starting values and disclaimer.
 
 == Upgrade Notice ==
 
@@ -58,6 +57,21 @@ Yes you can. We have provided a color picker that will change the look/feel of y
 First Version! Enjoy!
 
 == Changelog ==
+= 1.64 20261027 =
+
+* Fixed "Send Results!" failing with a PHP error when a monthly amount was $1,000 or more
+* Emailed amounts are read as numbers and formatted for the site's language; interest rates keep their decimals (6.125%)
+* "Send Results!" now works on cached pages: an expired security token is renewed and the send retried
+* Visitors now see a message when results can't be sent instead of nothing
+* Results are only emailed to a valid address, and the lead notification only goes out when an address is set
+* Added a rate limit to the results email (10 an hour per visitor, 3 an hour per address; mcwp_sendmail_rate_limits filter)
+* Settings are sanitized when saved, and every setting shown in the calculator is escaped
+* Fixed the Calculator Color setting not being validated when saved
+* Removed unused premium email templates and leftover Dreamweaver files
+* Contributors field now lists the WordPress.org username
+* Requires WordPress 5.5 or later (network settings use $new_allowed_options)
+* Tested up to WordPress 7.1
+
 = 1.63 20260324 =
 
 * Added CSRF/nonce protection to AJAX email endpoint

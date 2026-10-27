@@ -8,16 +8,16 @@ defined( 'ABSPATH' ) || exit;
  * phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.NonceVerification.Recommended
  */
 
-$calculation_result         = isset( $_POST['calculation_result'] ) ? sanitize_text_field( wp_unslash( $_POST['calculation_result'] ) ) : '';
-$principal_and_interest     = isset( $_POST['principal_and_interest'] ) ? sanitize_text_field( wp_unslash( $_POST['principal_and_interest'] ) ) : '';
-$price                      = isset( $_POST['purchase_price'] ) ? sanitize_text_field( wp_unslash( $_POST['purchase_price'] ) ) : '';
-$_term                      = isset( $_POST['mortgage_term'] ) ? sanitize_text_field( wp_unslash( $_POST['mortgage_term'] ) ) : '';
-$interest_rate              = isset( $_POST['interest_rate'] ) ? sanitize_text_field( wp_unslash( $_POST['interest_rate'] ) ) : '';
-$down_payment               = isset( $_POST['down_payment'] ) ? sanitize_text_field( wp_unslash( $_POST['down_payment'] ) ) : '';
-$monthly_taxes              = isset( $_POST['monthly_taxes'] ) ? sanitize_text_field( wp_unslash( $_POST['monthly_taxes'] ) ) : '';
-$monthly_insurance          = isset( $_POST['monthly_insurance'] ) ? round( sanitize_text_field( wp_unslash( $_POST['monthly_insurance'] ) ), 2 ) : '';
-$monthly_mortgage_insurance = isset( $_POST['monthly_mortgage_insurance'] ) ? sanitize_text_field( wp_unslash( $_POST['monthly_mortgage_insurance'] ) ) : '';
-$monthly_hoa                = isset( $_POST['monthly_hoa'] ) ? sanitize_text_field( wp_unslash( $_POST['monthly_hoa'] ) ) : '';
+// Amounts arrive formatted ("1,250.50"); mcwp_posted_amount() reads them as numbers.
+$calculation_result     = mcwp_posted_amount( 'calculation_result' );
+$principal_and_interest = mcwp_posted_amount( 'principal_and_interest' );
+$price                  = mcwp_posted_amount( 'purchase_price' );
+$_term                  = isset( $_POST['mortgage_term'] ) ? absint( wp_unslash( $_POST['mortgage_term'] ) ) : '';
+$interest_rate          = mcwp_posted_amount( 'interest_rate', true );
+$down_payment           = mcwp_posted_amount( 'down_payment' );
+$monthly_taxes          = mcwp_posted_amount( 'monthly_taxes' );
+$monthly_insurance      = mcwp_posted_amount( 'monthly_insurance' );
+$monthly_hoa            = mcwp_posted_amount( 'monthly_hoa' );
 $option_func                = ( mcwp_use_network_settings( 'wpmc_one_use_network_settings' ) === 'yes' ) ? 'get_site_option' : 'get_option';
 $subject = __( 'Your Conventional Mortgage Calculation', 'mortgage-calculators-wp' );
 

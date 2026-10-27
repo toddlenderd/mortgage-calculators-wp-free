@@ -12,15 +12,45 @@
         post_data.mcwp_nonce = mcwp_ajax.nonce;
         var currentFormEmail = $('input[type="email"]', forma).val();
         if (!validateEmail(currentFormEmail)) {
-            alert('Your Email is not valid!');
+            alert(mcwp_ajax.invalid_email);
             return false;
         }
 
-        $.post(mcwp_ajax.ajaxurl, post_data, function(response) {
-            alert(mcwp_ajax.calc_res);
+        var $button = $(this).prop('disabled', true);
+        sendResults(post_data, false).always(function() {
+            $button.prop('disabled', false);
         });
 
     });
+
+    // Send, and if the page came from a cache with an expired nonce, get a new one and retry once.
+    function sendResults(post_data, retried) {
+        var done = $.Deferred();
+        $.post(mcwp_ajax.ajaxurl, post_data).done(function() {
+            alert(mcwp_ajax.calc_res);
+            done.resolve();
+        }).fail(function(xhr) {
+            var code = xhr.responseJSON && xhr.responseJSON.data ? xhr.responseJSON.data.code : '';
+            if ('nonce' === code && !retried) {
+                $.post(mcwp_ajax.ajaxurl, { action: 'mcwp_nonce' }).done(function(response) {
+                    if (response && response.success) {
+                        mcwp_ajax.nonce = post_data.mcwp_nonce = response.data.nonce;
+                        sendResults(post_data, true).always(done.resolve);
+                    } else {
+                        alert(mcwp_ajax.send_error);
+                        done.resolve();
+                    }
+                }).fail(function() {
+                    alert(mcwp_ajax.send_error);
+                    done.resolve();
+                });
+                return;
+            }
+            alert('limit' === code ? mcwp_ajax.limit_error : ('email' === code ? mcwp_ajax.invalid_email : mcwp_ajax.send_error));
+            done.resolve();
+        });
+        return done.promise();
+    }
 
     function validateEmail(email) {
         var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -62,8 +92,8 @@
         var monthly_tax = (annual_tax / 12);
         var monthly_insurance = ($("#annual_insurance_inp", $parent).val() / 12);
         var monthly_hoa = $("#monthly_hoa_inp", $parent).val();
-        $("#down_payment_inp", $parent).val(addCommas(down_payment));
-        $("#annual_tax_inp", $parent).val(addCommas(annual_tax));
+        $("#down_payment_inp", $parent).val(addCommas(Number(roundOff(down_payment))));
+        $("#annual_tax_inp", $parent).val(addCommas(Number(roundOff(annual_tax))));
         mortgage_calc($parent);
 
         $parent.find('#mortgage_term_yr').on('change', function(event) {
@@ -85,14 +115,14 @@
                 down_payment_percent = slideEvt.value.newValue;
                 $(this).next("p").text(roundOff(down_payment_percent) + "%");
                 down_payment = (purchase_price * down_payment_percent) / 100;
-                $("#down_payment_inp", $parent).val(addCommas(down_payment));
+                $("#down_payment_inp", $parent).val(addCommas(Number(roundOff(down_payment))));
             }
             if ($(this).hasClass("annual_tax_scrl")) {
                 annual_tax_percent = slideEvt.value.newValue;
                 $(this).next("p").text(annual_tax_percent + "%");
                 annual_tax = (purchase_price * annual_tax_percent) / 100;
                 monthly_tax = (annual_tax / 12);
-                $("#annual_tax_inp", $parent).val(addCommas(roundOff(annual_tax)));
+                $("#annual_tax_inp", $parent).val(addCommas(Number(roundOff(annual_tax))));
             }
             if ($(this).hasClass("interest_rate_scrl")) {
                 interest_rate = slideEvt.value.newValue;
@@ -105,7 +135,7 @@
             purchase_price = $(this).val() == "" ? 0 : $(this).val();
             purchase_price = removeco(purchase_price);
             down_payment = (purchase_price * down_payment_percent) / 100;
-            $("#down_payment_inp", $parent).val(addCommas(down_payment));
+            $("#down_payment_inp", $parent).val(addCommas(Number(roundOff(down_payment))));
             $(this).val(purchase_price);
             $(this).val(function(index, value) {
                 return value
@@ -136,7 +166,7 @@
                     .replace(/\D/g, "")
                     .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             });
-            $("#annual_tax_inp", $parent).val(addCommas(annual_tax));
+            $("#annual_tax_inp", $parent).val(addCommas(Number(roundOff(annual_tax))));
             monthly_tax = (annual_tax / 12);
             mortgage_calc($parent);
         });

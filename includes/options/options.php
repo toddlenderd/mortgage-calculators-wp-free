@@ -18,7 +18,7 @@ function wpmc_admin_init() {
 
 	if ( is_multisite() && ! is_network_admin() ) {
 		add_settings_field( 'wpmc_mail_use_network_settings', __( 'Use Network Settings', 'mortgage-calculators-wp' ), 'mcwp_checkbox', 'wpmc-settings-mail', 'wpmc_mail', array( 'wpmc_mail_use_network_settings', 'wpmc_mail' ) );
-		register_setting( 'wpmc_mail', 'wpmc_mail_use_network_settings' );
+		register_setting( 'wpmc_mail', 'wpmc_mail_use_network_settings', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 	}
 	$text     = 'mcwp_display_text_element';
 	$textarea = 'mcwp_textarea';
@@ -80,11 +80,8 @@ function wpmc_admin_init() {
 		$f_title  = $val['label'];
 		$f_page   = $val['section_name'];
 		$f_group  = $val['group'];
-		if ( 'mcwp_color_input' === $callback ) {
-			$val['sanitize_callback'] = 'sanitize_hex_color';
-		}
 		add_settings_field( $fid, $f_title, $callback, $f_page, $f_group, $val );
-		register_setting( $val['group'], $val[0] );
+		register_setting( $val['group'], $val[0], array( 'sanitize_callback' => mcwp_setting_sanitizer( $val['type'] ) ) );
 	}
 
 	// Calculator One Options
@@ -93,7 +90,7 @@ function wpmc_admin_init() {
 
 	if ( is_multisite() && ! is_network_admin() ) {
 		add_settings_field( 'wpmc_one_use_network_settings', __( 'Use Network Settings', 'mortgage-calculators-wp' ), 'mcwp_checkbox', 'wpmc-settings-one', 'wpmc_one', array( 'wpmc_one_use_network_settings', 'wpmc_one' ) );
-		register_setting( 'wpmc_one', 'wpmc_one_use_network_settings' );
+		register_setting( 'wpmc_one', 'wpmc_one_use_network_settings', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 	}
 	$allfields = array(
 		array(
@@ -232,7 +229,7 @@ function wpmc_admin_init() {
 
 	foreach ( $allfields as $key => $val ) {
 		add_settings_field( $val[0], $val['label'], $val['type'], $val['section_name'], $val['group'], $val );
-		register_setting( $val['group'], $val[0] );
+		register_setting( $val['group'], $val[0], array( 'sanitize_callback' => mcwp_setting_sanitizer( $val['type'] ) ) );
 	}
 
 	// Calculator Two Options
@@ -241,7 +238,7 @@ function wpmc_admin_init() {
 
 	if ( is_multisite() && ! is_network_admin() ) {
 		add_settings_field( 'wpmc_two_use_network_settings', __( 'Use Network Settings', 'mortgage-calculators-wp' ), 'mcwp_checkbox', 'wpmc-settings-two', 'wpmc_two', array( 'wpmc_two_use_network_settings', 'wpmc_two' ) );
-		register_setting( 'wpmc_two', 'wpmc_two_use_network_settings' );
+		register_setting( 'wpmc_two', 'wpmc_two_use_network_settings', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 	}
 
 	$allfields = array(
@@ -404,7 +401,7 @@ function wpmc_admin_init() {
 
 	foreach ( $allfields as $key => $val ) {
 		add_settings_field( $val[0], $val['label'], $val['type'], $val['section_name'], $val['group'], $val );
-		register_setting( $val['group'], $val[0] );
+		register_setting( $val['group'], $val[0], array( 'sanitize_callback' => mcwp_setting_sanitizer( $val['type'] ) ) );
 	}
 
 	// Calculator Three Options
@@ -413,7 +410,7 @@ function wpmc_admin_init() {
 
 	if ( is_multisite() && ! is_network_admin() ) {
 		add_settings_field( 'wpmc_three_use_network_settings', __( 'Use Network Settings', 'mortgage-calculators-wp' ), 'mcwp_checkbox', 'wpmc-settings-three', 'wpmc_three', array( 'wpmc_three_use_network_settings', 'wpmc_three' ) );
-		register_setting( 'wpmc_three', 'wpmc_three_use_network_settings' );
+		register_setting( 'wpmc_three', 'wpmc_three_use_network_settings', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 	}
 
 	$allfields = array(
@@ -591,7 +588,7 @@ function wpmc_admin_init() {
 
 	foreach ( $allfields as $key => $val ) {
 		add_settings_field( $val[0], $val['label'], $val['type'], $val['section_name'], $val['group'], $val );
-		register_setting( $val['group'], $val[0] );
+		register_setting( $val['group'], $val[0], array( 'sanitize_callback' => mcwp_setting_sanitizer( $val['type'] ) ) );
 	}
 
 	// Calculator Five Options
@@ -600,7 +597,7 @@ function wpmc_admin_init() {
 
 	if ( is_multisite() && ! is_network_admin() ) {
 		add_settings_field( 'wpmc_five_use_network_settings', __( 'Use Network Settings', 'mortgage-calculators-wp' ), 'mcwp_checkbox', 'wpmc-settings-five', 'wpmc_five', array( 'wpmc_five_use_network_settings', 'wpmc_five' ) );
-		register_setting( 'wpmc_five', 'wpmc_five_use_network_settings' );
+		register_setting( 'wpmc_five', 'wpmc_five_use_network_settings', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 	}
 
 	$allfields = array(
@@ -746,7 +743,7 @@ function wpmc_admin_init() {
 
 	foreach ( $allfields as $key => $val ) {
 		add_settings_field( $val[0], $val['label'], $val['type'], $val['section_name'], $val['group'], $val );
-		register_setting( $val['group'], $val[0] );
+		register_setting( $val['group'], $val[0], array( 'sanitize_callback' => mcwp_setting_sanitizer( $val['type'] ) ) );
 	}
 
 	// Calculator Six RC Options
@@ -755,7 +752,7 @@ function wpmc_admin_init() {
 
 	if ( is_multisite() && ! is_network_admin() ) {
 		add_settings_field( 'wpmc_six_use_network_settings', __( 'Use Network Settings', 'mortgage-calculators-wp' ), 'mcwp_checkbox', 'wpmc-settings-six', 'wpmc_six', array( 'wpmc_six_use_network_settings', 'wpmc_six' ) );
-		register_setting( 'wpmc_six', 'wpmc_six_use_network_settings' );
+		register_setting( 'wpmc_six', 'wpmc_six_use_network_settings', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 	}
 
 	$allfields = array(
@@ -936,7 +933,7 @@ function wpmc_admin_init() {
 
 	foreach ( $allfields as $key => $val ) {
 		add_settings_field( $val[0], $val['label'], $val['type'], $val['section_name'], $val['group'], $val );
-		register_setting( $val['group'], $val[0] );
+		register_setting( $val['group'], $val[0], array( 'sanitize_callback' => mcwp_setting_sanitizer( $val['type'] ) ) );
 	}
 }
 
@@ -992,6 +989,37 @@ function wpmc_five_display_shortcode() {
  */
 function wpmc_six_display_shortcode() {
 	mcwp_copy_short_text( 'rc' );
+}
+
+/**
+ * Sanitize callback for a settings field, by its field type: HTML that's allowed in posts for
+ * the message boxes, a valid color (or a shortcode) for the color, plain text for the rest.
+ *
+ * @param string $type Field render callback (the 'type' in the field definitions above).
+ * @return callable
+ */
+function mcwp_setting_sanitizer( $type ) {
+	if ( 'mcwp_textarea' === $type || 'mcwp_msg_body' === $type ) {
+		return 'wp_kses_post';
+	}
+	if ( 'mcwp_color_input' === $type ) {
+		return 'mcwp_sanitize_color';
+	}
+	return 'sanitize_text_field';
+}
+
+/**
+ * Sanitize the calculator color: a CSS color, or a shortcode that returns one.
+ *
+ * @param string $color Submitted color.
+ * @return string The color, or '' (the default) when it isn't one.
+ */
+function mcwp_sanitize_color( $color ) {
+	$color = trim( sanitize_text_field( (string) $color ) );
+	if ( '' === $color || mcwp_is_color( $color ) || preg_match( '/^[[^[]]+]$/', $color ) ) {
+		return $color;
+	}
+	return '';
 }
 
 /**
@@ -1057,7 +1085,7 @@ function mcwp_dropdown( $args ) {
 function mcwp_textarea( $args ) {
 	$options = mcwp_get_option( $args[0] );
 	?>
-		<textarea name="<?php echo esc_attr( $args[0] ); ?>" class="<?php echo esc_attr( $args['group'] ); ?>" placeholder="<?php echo esc_attr( $args['placeholder'] ); ?>" rows="5" cols="65" size="64" ><?php echo isset( $options ) ? esc_attr( $options ) : ''; ?></textarea>
+		<textarea name="<?php echo esc_attr( $args[0] ); ?>" class="<?php echo esc_attr( $args['group'] ); ?>" placeholder="<?php echo esc_attr( $args['placeholder'] ); ?>" rows="5" cols="65" size="64" ><?php echo isset( $options ) ? esc_textarea( $options ) : ''; ?></textarea>
 	<?php
 }
 
